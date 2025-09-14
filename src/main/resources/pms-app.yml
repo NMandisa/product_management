@@ -1,0 +1,14 @@
+hikari:
+  config:
+    connection-timeout: 60000
+    connectionTestQuery: SELECT 1
+    dataSource:
+      password: root
+      url: jdbc:mysql://localhost:3306/db_pms_app?createDatabaseIfNotExist=true&serverTimezone=UTC
+      user: root
+    dataSourceClassName: com.mysql.cj.jdbc.MysqlDataSource
+    idleTimeout: 30000
+    maximumPoolSize: 20
+    minimumIdle: 5
+    poolName: pms_app_con_pool
+    transactionIsolation: TRANSACTION_REPEATABLE_READ

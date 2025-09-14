@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ~ Copyright (c) 2025 - . ~ Author : Noxolo.Mkhungo  -->
+<beans xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="
+    http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <context:property-placeholder properties-ref="yamlProperties"/>
+
+    <context:annotation-config/>
+    <context:component-scan base-package="za.co.pms"/>
+
+    <!-- Enable Spring Data JPA repository support -->
+    <context:component-scan base-package="za.co.pms.repository">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Repository"/>
+    </context:component-scan>
+
+    <!-- Enable transaction annotation support -->
+    <tx:annotation-driven/>
+
+    <import resource="spring-datasource.xml"/>
+
+    <!-- Load YAML properties -->
+    <bean id="yamlProperties" class="org.springframework.beans.factory.config.YamlPropertiesFactoryBean">
+        <property name="resources" value="classpath:pms-app.yml"/>
+    </bean>
+    <bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
+        <property name="properties" ref="yamlProperties"/>
+    </bean>
+
+    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+        <property name="basenames">
+            <list>
+                <value>base.pms_app_locale</value>
+                <value>base.pms_app_locale_nr_ZA</value>
+                <value>base.pms_app_locale_ts_ZA</value>
+                <value>base.pms_app_locale_xh_ZA</value>
+                <value>base.pms_app_locale_zu_ZA</value>
+            </list>
+        </property>
+        <property name="defaultEncoding" value="UTF-8"/>
+    </bean>
+
+    <beans profile="test">
+        <!-- Load YAML properties -->
+        <bean id="yamlProperties" class="org.springframework.beans.factory.config.YamlPropertiesFactoryBean">
+            <property name="resources" value="classpath:pms-app-test.yml"/>
+        </bean>
+        <bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
+            <property name="properties" ref="yamlProperties"/>
+        </bean>
+    </beans>
+</beans>
