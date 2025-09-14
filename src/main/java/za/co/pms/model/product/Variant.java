@@ -7,7 +7,6 @@ import za.co.pms.model.Product;
 import za.co.pms.model.inventory.sku.StockAllocation;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -41,6 +40,19 @@ public class Variant {
 
     @OneToMany(mappedBy = "productVariant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<StockAllocation> stockAllocations = new HashSet<>();
+
+    @OneToMany(mappedBy = "variant")
+    private Set<Price> prices = new HashSet<>();
+
+    public void addPrice(Price price) {
+        prices.add(price);
+        price.setVariant(this);
+    }
+
+    public boolean hasRestrictedCategory() {
+        // Implementation based on your business logic
+        return false;
+    }
 
     // Helper methods
     public void addStockAllocation(StockAllocation allocation) {
