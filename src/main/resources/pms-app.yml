@@ -12,3 +12,7 @@ hikari:
     minimumIdle: 5
     poolName: pms_app_con_pool
     transactionIsolation: TRANSACTION_REPEATABLE_READ
+
+currency:
+  config:
+    location: classpath:config/currency-config.json

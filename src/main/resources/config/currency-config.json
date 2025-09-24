@@ -1,0 +1,156 @@
+{
+  "default": "ZAR",
+  "supported": [
+    { "code": "ZAR", "symbol": "R", "name": "South African Rand", "precision": 2 },
+    { "code": "USD", "symbol": "$", "name": "US Dollar", "precision": 2 },
+    { "code": "NGN", "symbol": "₦", "name": "Nigerian Naira", "precision": 0 },
+    { "code": "KES", "symbol": "KSh", "name": "Kenyan Shilling", "precision": 0 },
+    { "code": "EUR", "symbol": "€", "name": "Euro", "precision": 2 },
+
+    { "code": "BWP", "symbol": "P", "name": "Botswana Pula", "precision": 2 },
+    { "code": "MZN", "symbol": "MT", "name": "Mozambican Metical", "precision": 2 },
+    { "code": "TZS", "symbol": "TSh", "name": "Tanzanian Shilling", "precision": 2 },
+    { "code": "ZMW", "symbol": "K", "name": "Zambian Kwacha", "precision": 2 },
+    { "code": "MWK", "symbol": "MK", "name": "Malawian Kwacha", "precision": 2 },
+    { "code": "NAD", "symbol": "N$", "name": "Namibian Dollar", "precision": 2 },
+
+    { "code": "GHS", "symbol": "GH₵", "name": "Ghanaian Cedi", "precision": 2 },
+    { "code": "EGP", "symbol": "E£", "name": "Egyptian Pound", "precision": 2 },
+    { "code": "XOF", "symbol": "CFA", "name": "West African CFA Franc", "precision": 0 },
+    { "code": "XAF", "symbol": "FCFA", "name": "Central African CFA Franc", "precision": 0 },
+    { "code": "RWF", "symbol": "FRw", "name": "Rwandan Franc", "precision": 0 },
+    { "code": "UGX", "symbol": "USh", "name": "Ugandan Shilling", "precision": 0 },
+
+    { "code": "GBP", "symbol": "£", "name": "British Pound", "precision": 2 },
+    { "code": "CNY", "symbol": "¥", "name": "Chinese Yuan", "precision": 2 },
+    { "code": "INR", "symbol": "₹", "name": "Indian Rupee", "precision": 2 },
+    { "code": "AUD", "symbol": "A$", "name": "Australian Dollar", "precision": 2 },
+    { "code": "CAD", "symbol": "C$", "name": "Canadian Dollar", "precision": 2 },
+    { "code": "JPY", "symbol": "¥", "name": "Japanese Yen", "precision": 0 },
+    { "code": "CHF", "symbol": "CHF", "name": "Swiss Franc", "precision": 2 },
+    { "code": "AED", "symbol": "د.إ", "name": "UAE Dirham", "precision": 2 },
+    { "code": "SAR", "symbol": "﷼", "name": "Saudi Riyal", "precision": 2 },
+    { "code": "BRL", "symbol": "R$", "name": "Brazilian Real", "precision": 2 }
+  ],
+  
+  "fxProvider": "openexchangerates.org",
+  "backupFxProviders": ["fixer.io", "currencyapi.com"],
+  "markup": 0.05,
+  "autoDetect": true,
+  "showTooltip": true,
+  
+  "formatting": {
+    "ZAR": { "thousandsSeparator": " ", "decimalSeparator": ".", "symbolPosition": "before", "spaceBetweenSymbol": true },
+    "USD": { "thousandsSeparator": ",", "decimalSeparator": ".", "symbolPosition": "before", "spaceBetweenSymbol": false },
+    "NGN": { "thousandsSeparator": ",", "decimalSeparator": ".", "symbolPosition": "before", "spaceBetweenSymbol": false },
+    "KES": { "thousandsSeparator": ",", "decimalSeparator": ".", "symbolPosition": "before", "spaceBetweenSymbol": false },
+    "EUR": { "thousandsSeparator": ".", "decimalSeparator": ",", "symbolPosition": "after", "spaceBetweenSymbol": true },
+    "BWP": { "thousandsSeparator": ",", "decimalSeparator": ".", "symbolPosition": "before", "spaceBetweenSymbol": false },
+    "MZN": { "thousandsSeparator": " ", "decimalSeparator": ",", "symbolPosition": "after", "spaceBetweenSymbol": true },
+    "TZS": { "thousandsSeparator": ",", "decimalSeparator": ".", "symbolPosition": "before", "spaceBetweenSymbol": false },
+    "ZMW": { "thousandsSeparator": ",", "decimalSeparator": ".", "symbolPosition": "before", "spaceBetweenSymbol": false },
+
+    "GHS": { "thousandsSeparator": ",", "decimalSeparator": ".", "symbolPosition": "before", "spaceBetweenSymbol": false },
+    "EGP": { "thousandsSeparator": ",", "decimalSeparator": ".", "symbolPosition": "before", "spaceBetweenSymbol": false },
+    "XOF": { "thousandsSeparator": " ", "decimalSeparator": ".", "symbolPosition": "after", "spaceBetweenSymbol": true },
+    "XAF": { "thousandsSeparator": " ", "decimalSeparator": ".", "symbolPosition": "after", "spaceBetweenSymbol": true },
+    "RWF": { "thousandsSeparator": " ", "decimalSeparator": ".", "symbolPosition": "after", "spaceBetweenSymbol": true },
+    "UGX": { "thousandsSeparator": ",", "decimalSeparator": ".", "symbolPosition": "before", "spaceBetweenSymbol": false },
+
+    "GBP": { "thousandsSeparator": ",", "decimalSeparator": ".", "symbolPosition": "before", "spaceBetweenSymbol": false },
+    "CNY": { "thousandsSeparator": ",", "decimalSeparator": ".", "symbolPosition": "before", "spaceBetweenSymbol": false },
+    "INR": { "thousandsSeparator": ",", "decimalSeparator": ".", "symbolPosition": "before", "spaceBetweenSymbol": false },
+    "AUD": { "thousandsSeparator": ",", "decimalSeparator": ".", "symbolPosition": "before", "spaceBetweenSymbol": false },
+    "CAD": { "thousandsSeparator": ",", "decimalSeparator": ".", "symbolPosition": "before", "spaceBetweenSymbol": false },
+    "JPY": { "thousandsSeparator": ",", "decimalSeparator": ".", "symbolPosition": "before", "spaceBetweenSymbol": false },
+    "CHF": { "thousandsSeparator": "'", "decimalSeparator": ".", "symbolPosition": "before", "spaceBetweenSymbol": true },
+    "AED": { "thousandsSeparator": ",", "decimalSeparator": ".", "symbolPosition": "before", "spaceBetweenSymbol": false },
+    "SAR": { "thousandsSeparator": ",", "decimalSeparator": ".", "symbolPosition": "before", "spaceBetweenSymbol": false },
+    "BRL": { "thousandsSeparator": ".", "decimalSeparator": ",", "symbolPosition": "before", "spaceBetweenSymbol": true }
+  },
+  
+  "regionalDefaults": {
+    "ZA": "ZAR",
+    "US": "USD",
+    "NG": "NGN",
+    "KE": "KES",
+    "BW": "BWP",
+    "MZ": "MZN",
+    "TZ": "TZS",
+    "ZM": "ZMW",
+    "MW": "MWK",
+    "NA": "NAD",
+
+    "GH": "GHS",
+    "EG": "EGP",
+    "SN": "XOF", "CI": "XOF", "BJ": "XOF", "BF": "XOF", "ML": "XOF", "NE": "XOF", "TG": "XOF",
+    "CM": "XAF", "CF": "XAF", "TD": "XAF", "CG": "XAF", "GQ": "XAF", "GA": "XAF",
+    "RW": "RWF",
+    "UG": "UGX",
+
+    "GB": "GBP",
+    "CN": "CNY",
+    "IN": "INR",
+    "AU": "AUD",
+    "CA": "CAD",
+    "JP": "JPY",
+    "CH": "CHF",
+    "AE": "AED",
+    "SA": "SAR",
+    "BR": "BRL",
+
+    "FR": "EUR", "DE": "EUR", "IT": "EUR", "ES": "EUR", "PT": "EUR", "NL": "EUR",
+    "BE": "EUR", "IE": "EUR", "AT": "EUR", "FI": "EUR", "GR": "EUR", "SE": "EUR",
+    "DK": "EUR", "PL": "EUR", "CZ": "EUR", "HU": "EUR", "RO": "EUR", "BG": "EUR",
+    
+    "default": "ZAR"
+  },
+  
+  "advancedFeatures": {
+    "realTimeConversion": true,
+    "historicalRates": true,
+    "multiCurrencyWallets": true,
+    "autoCurrencySwitching": true,
+    "offlineMode": true,
+    "rateAlerts": true
+  },
+  
+  "compliance": {
+    "southAfrica": { "POPIA": true, "FICA": true, "VAT": 0.15 },
+    "europe": { "GDPR": true, "PSD2": true, "VAT": true },
+    "nigeria": { "NDPR": true, "CBNGuidelines": true },
+    "kenya": { "DataProtectionAct": true, "CBKRegulations": true },
+    "global": { "AML": true, "KYC": true, "SanctionScreening": true }
+  },
+  
+  "paymentMethods": {
+    "southAfrica": ["EFT", "SnapScan", "Zapper", "PayFast"],
+    "westAfrica": ["Flutterwave", "Paystack", "Interswitch"],
+    "eastAfrica": ["M-Pesa", "AirtelMoney", "TigoPesa"],
+    "europe": ["SEPA", "iDEAL", "Giropay", "SOFORT"],
+    "global": ["Visa", "Mastercard", "PayPal", "Swift"]
+  },
+  
+  "localization": {
+    "supportedLanguages": [
+      "en", "zu", "af",
+      "pt", "fr",
+      "sw", "ar", "ha", "yo",
+      "zh", "es", "hi", "ja"
+    ],
+    "rtlSupport": true,
+    "localeAwareFormatting": true,
+    "culturalAdaptations": {
+      "islamicCalendar": true,
+      "localHolidays": true,
+      "numberSystems": ["arabic", "latin"]
+    }
+  },
+  
+  "analytics": {
+    "mostPopularCurrencies": ["ZAR", "USD", "NGN", "EUR", "KES", "GHS", "GBP"],
+    "conversionVolume": "5B+ ZAR monthly",
+    "userSatisfaction": 4.8,
+    "uptime": 99.99
+  }
+}

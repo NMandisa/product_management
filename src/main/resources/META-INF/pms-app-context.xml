@@ -34,6 +34,13 @@
     <bean class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
         <property name="properties" ref="yamlProperties"/>
     </bean>
+    <bean id="appDefaults" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="properties">
+            <props>
+                <prop key="currency.config.location">${currency.config.location}</prop>
+            </props>
+        </property>
+    </bean>
 
     <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
         <property name="basenames">
@@ -47,6 +54,21 @@
         </property>
         <property name="defaultEncoding" value="UTF-8"/>
     </bean>
+
+    <!-- SINGLE ObjectMapper bean-->
+    <bean id="objectMapper" class="com.fasterxml.jackson.databind.ObjectMapper">
+        <property name="serializationInclusion">
+            <value type="com.fasterxml.jackson.annotation.JsonInclude.Include">NON_NULL</value>
+        </property>
+<!--        <property name="prettyPrint" value="false"/>-->
+        <!--<property name="registeredModuleClasses">
+            <list>
+                <value>com.fasterxml.jackson.datatype.jsr310.JavaTimeModule</value>
+            </list>
+        </property>-->
+    </bean>
+    <!-- Jakarta / Hibernate Validator -->
+    <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"/>
 
     <beans profile="test">
         <!-- Load YAML properties -->
