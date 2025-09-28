@@ -1,0 +1,188 @@
+{
+  "languages": [
+    {
+      "code": "en",
+      "name": "English",
+      "nativeName": "English",
+      "rtl": false,
+      "default": true
+    },
+    {
+      "code": "zu",
+      "name": "Zulu",
+      "nativeName": "isiZulu",
+      "rtl": false,
+      "region": "ZA"
+    },
+    {
+      "code": "af",
+      "name": "Afrikaans",
+      "nativeName": "Afrikaans",
+      "rtl": false,
+      "region": "ZA"
+    },
+    {
+      "code": "pt",
+      "name": "Portuguese",
+      "nativeName": "Português",
+      "rtl": false,
+      "region": "MZ"
+    },
+    {
+      "code": "fr",
+      "name": "French",
+      "nativeName": "Français",
+      "rtl": false,
+      "region": "SN,CI"
+    },
+    {
+      "code": "sw",
+      "name": "Swahili",
+      "nativeName": "Kiswahili",
+      "rtl": false,
+      "region": "KE,TZ,UG"
+    },
+    {
+      "code": "ar",
+      "name": "Arabic",
+      "nativeName": "العربية",
+      "rtl": true,
+      "region": "EG"
+    },
+    {
+      "code": "ha",
+      "name": "Hausa",
+      "nativeName": "Hausa",
+      "rtl": false,
+      "region": "NG"
+    },
+    {
+      "code": "yo",
+      "name": "Yoruba",
+      "nativeName": "Yorùbá",
+      "rtl": false,
+      "region": "NG"
+    },
+    {
+      "code": "zh",
+      "name": "Chinese",
+      "nativeName": "中文",
+      "rtl": false,
+      "region": "CN"
+    },
+    {
+      "code": "es",
+      "name": "Spanish",
+      "nativeName": "Español",
+      "rtl": false,
+      "region": "GLOBAL"
+    },
+    {
+      "code": "hi",
+      "name": "Hindi",
+      "nativeName": "हिन्दी",
+      "rtl": false,
+      "region": "IN"
+    },
+    {
+      "code": "ja",
+      "name": "Japanese",
+      "nativeName": "日本語",
+      "rtl": false,
+      "region": "JP"
+    }
+  ],
+  "rtl": true,
+  "localeAwareFormatting": true,
+  "culturalAdaptations": {
+    "calendars": ["gregorian", "islamic", "ethiopian"],
+    "localHolidays": true,
+    "numberSystems": ["latin", "arabic", "devanagari"],
+    "currencyPlacement": {
+      "default": "before",
+      "exceptions": {
+        "fr": "after",
+        "ar": "beforeNoSpace",
+        "ja": "beforeNoSpace"
+      }
+    },
+    "dateFormats": {
+      "ZA": "yyyy/MM/dd",
+      "NG": "dd/MM/yyyy",
+      "KE": "dd-MM-yyyy",
+      "EG": "dd/MM/yyyy",
+      "CN": "yyyy-MM-dd",
+      "default": "yyyy-MM-dd"
+    },
+    "timeFormats": {
+      "ZA": "HH:mm",
+      "NG": "hh:mm a",
+      "KE": "HH:mm",
+      "default": "HH:mm"
+    },
+    "numberFormats": {
+      "ZA": {
+        "decimal": ".",
+        "thousands": " ",
+        "grouping": [3, 3]
+      },
+      "NG": {
+        "decimal": ".",
+        "thousands": ",",
+        "grouping": [3, 3]
+      },
+      "FR": {
+        "decimal": ",",
+        "thousands": " ",
+        "grouping": [3, 3]
+      },
+      "default": {
+        "decimal": ".",
+        "thousands": ",",
+        "grouping": [3, 3]
+      }
+    }
+  },
+  "regionalSettings": {
+    "southernAfrica": {
+      "defaultLanguage": "en",
+      "fallbackLanguages": ["zu", "af"],
+      "dateFormat": "yyyy/MM/dd",
+      "timeFormat": "HH:mm",
+      "firstDayOfWeek": 0
+    },
+    "westAfrica": {
+      "defaultLanguage": "en",
+      "fallbackLanguages": ["fr", "ha", "yo"],
+      "dateFormat": "dd/MM/yyyy",
+      "timeFormat": "hh:mm a",
+      "firstDayOfWeek": 1
+    },
+    "eastAfrica": {
+      "defaultLanguage": "sw",
+      "fallbackLanguages": ["en", "ar"],
+      "dateFormat": "dd-MM-yyyy",
+      "timeFormat": "HH:mm",
+      "firstDayOfWeek": 0
+    },
+    "northAfrica": {
+      "defaultLanguage": "ar",
+      "fallbackLanguages": ["fr", "en"],
+      "dateFormat": "dd/MM/yyyy",
+      "timeFormat": "HH:mm",
+      "firstDayOfWeek": 6
+    }
+  },
+  "accessibility": {
+    "highContrast": true,
+    "largeText": true,
+    "screenReader": true,
+    "voiceCommands": false
+  },
+  "localizationEngine": {
+    "autoDetection": true,
+    "fallbackChains": true,
+    "contextAware": true,
+    "version": "2025-09-26"
+  }
+}

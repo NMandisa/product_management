@@ -1,0 +1,179 @@
+{
+  "default": "ZAR",
+  "fx": {
+    "primary": "openexchangerates.org",
+    "backups": ["fixer.io", "currencyapi.com", "africafxcouncil.org"],
+    "markup": 0.05,
+    "cacheTimeoutMinutes": 30,
+    "retryAttempts": 3,
+    "circuitBreaker": {
+      "failureThreshold": 5,
+      "resetTimeout": 300000
+    }
+  },
+  "currencies": {
+    "ZAR": {
+      "code": "ZAR",
+      "symbol": "R",
+      "name": "South African Rand",
+      "precision": 2,
+      "formatting": {
+        "thousands": " ",
+        "decimal": ".",
+        "position": "before",
+        "space": true,
+        "negativeFormat": "-{symbol}{amount}"
+      },
+      "complianceRef": "southAfrica",
+      "fxRules": {
+        "defaultRateSource": "SARB",
+        "crossBorderRestrictions": true,
+        "allowedCrosses": ["USD", "EUR", "GBP", "NGN", "KES", "BWP"],
+        "maxDailyLimit": 1000000,
+        "volatilityThreshold": 0.05
+      },
+      "status": "ACTIVE",
+      "priority": 1,
+      "region": "southernAfrica",
+      "centralBank": "SARB",
+      "digitalMaturity": "HIGH"
+    },
+    "NGN": {
+      "code": "NGN",
+      "symbol": "₦",
+      "name": "Nigerian Naira",
+      "precision": 0,
+      "formatting": {
+        "thousands": ",",
+        "decimal": ".",
+        "position": "before",
+        "space": false
+      },
+      "complianceRef": "nigeria",
+      "fxRules": {
+        "defaultRateSource": "CBN",
+        "crossBorderRestrictions": true,
+        "allowedCrosses": ["USD", "EUR", "GBP", "ZAR", "GHS"],
+        "maxDailyLimit": 10000,
+        "volatilityThreshold": 0.03
+      },
+      "status": "ACTIVE",
+      "priority": 2,
+      "region": "westAfrica",
+      "centralBank": "CBN",
+      "digitalMaturity": "HIGH"
+    },
+    "KES": {
+      "code": "KES",
+      "symbol": "KSh",
+      "name": "Kenyan Shilling",
+      "precision": 0,
+      "formatting": {
+        "thousands": ",",
+        "decimal": ".",
+        "position": "before",
+        "space": false
+      },
+      "complianceRef": "kenya",
+      "fxRules": {
+        "defaultRateSource": "CBK",
+        "crossBorderRestrictions": true,
+        "allowedCrosses": ["USD", "EUR", "ZAR", "UGX", "TZS"],
+        "maxDailyLimit": 500000,
+        "volatilityThreshold": 0.04
+      },
+      "status": "ACTIVE",
+      "priority": 3,
+      "region": "eastAfrica",
+      "centralBank": "CBK",
+      "digitalMaturity": "HIGH"
+    },
+    "GHS": {
+      "code": "GHS",
+      "symbol": "GH₵",
+      "name": "Ghanaian Cedi",
+      "precision": 2,
+      "formatting": {
+        "thousands": ",",
+        "decimal": ".",
+        "position": "before",
+        "space": false
+      },
+      "complianceRef": "ghana",
+      "fxRules": {
+        "defaultRateSource": "BOG",
+        "crossBorderRestrictions": true,
+        "allowedCrosses": ["USD", "EUR", "NGN", "XOF"],
+        "maxDailyLimit": 10000
+      },
+      "status": "ACTIVE",
+      "priority": 4,
+      "region": "westAfrica",
+      "centralBank": "BOG"
+    },
+    "USD": {
+      "code": "USD",
+      "symbol": "$",
+      "name": "US Dollar",
+      "precision": 2,
+      "formatting": {
+        "thousands": ",",
+        "decimal": ".",
+        "position": "before",
+        "space": false
+      },
+      "complianceRef": "global",
+      "fxRules": {
+        "defaultRateSource": "FED",
+        "crossBorderRestrictions": false,
+        "allowedCrosses": ["ALL"],
+        "maxDailyLimit": null
+      },
+      "status": "ACTIVE",
+      "priority": 5,
+      "region": "globalReserve"
+    }
+  },
+  "regionalDefaults": {
+    "ZA": "ZAR",
+    "NG": "NGN",
+    "KE": "KES",
+    "GH": "GHS",
+    "BW": "BWP",
+    "MZ": "MZN",
+    "TZ": "TZS",
+    "ZM": "ZMW",
+    "MW": "MWK",
+    "NA": "NAD",
+    "EG": "EGP",
+    "SN": "XOF",
+    "CI": "XOF",
+    "RW": "RWF",
+    "UG": "UGX",
+    "US": "USD",
+    "GB": "GBP",
+    "FR": "EUR",
+    "CN": "CNY",
+    "IN": "INR",
+    "global": "USD"
+  },
+  "advancedFeatures": {
+    "realTimeConversion": true,
+    "historicalRates": true,
+    "multiCurrencyWallets": true,
+    "autoCurrencySwitching": true,
+    "offlineMode": true,
+    "rateAlerts": true,
+    "predictiveRates": false,
+    "batchProcessing": true,
+    "apiRateLimits": 1000
+  },
+  "regionalHierarchy": {
+    "southernAfrica": ["ZAR", "BWP", "MZN", "ZMW", "MWK", "NAD"],
+    "westAfrica": ["NGN", "GHS", "XOF", "XAF", "GNF"],
+    "eastAfrica": ["KES", "TZS", "UGX", "RWF", "ETB"],
+    "northAfrica": ["EGP", "MAD", "DZD", "TND"],
+    "globalReserve": ["USD", "EUR", "GBP", "CNY"],
+    "emergingMarkets": ["INR", "BRL", "TRY", "MXN"]
+  }
+}

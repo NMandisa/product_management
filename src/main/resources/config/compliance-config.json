@@ -1,0 +1,123 @@
+{
+  "southAfrica": {
+    "POPIA": true,
+    "FICA": true,
+    "financialSurveillance": true,
+    "taxAuthority": "SARS",
+    "VAT": 0.15,
+    "withholdingTax": 0.15,
+    "reportingThreshold": 50000,
+    "requiredLicenses": ["FSCA Remittance License", "PSP License"],
+    "additionalRules": {
+      "crossBorderReporting": true,
+      "suspiciousActivityThreshold": 25000,
+      "recordKeepingYears": 5
+    }
+  },
+  "nigeria": {
+    "NDPR": true,
+    "CBNGuidelines": true,
+    "SECRegistration": true,
+    "taxAuthority": "FIRS",
+    "VAT": 0.075,
+    "withholdingTax": 0.10,
+    "reportingThreshold": 10000,
+    "requiredLicenses": ["CBN IMTO License", "PSP License"],
+    "additionalRules": {
+      "forexControls": true,
+      "capitalExportRestrictions": true,
+      "localContentRequirements": true
+    }
+  },
+  "kenya": {
+    "DataProtectionAct": true,
+    "CBKRegulations": true,
+    "capitalMarketsAuthority": true,
+    "taxAuthority": "KRA",
+    "VAT": 0.16,
+    "withholdingTax": 0.05,
+    "reportingThreshold": 500000,
+    "requiredLicenses": ["CBK Money Remittance License", "Payment Service Provider"],
+    "additionalRules": {
+      "mobileMoneyRegulation": true,
+      "agentBankingRules": true,
+      "consumerProtection": true
+    }
+  },
+  "ghana": {
+    "DataProtectionAct": true,
+    "BOGRegulations": true,
+    "taxAuthority": "GRA",
+    "VAT": 0.125,
+    "withholdingTax": 0.075,
+    "reportingThreshold": 10000,
+    "requiredLicenses": ["Bank of Ghana Payment Service Provider"],
+    "additionalRules": {
+      "forexBrokerRegistration": true,
+      "electronicMoneyIssuer": false
+    }
+  },
+  "egypt": {
+    "DataProtectionLaw": true,
+    "CBERegulations": true,
+    "taxAuthority": "ETA",
+    "VAT": 0.14,
+    "withholdingTax": 0.20,
+    "reportingThreshold": 50000,
+    "requiredLicenses": ["CBE Fintech License"],
+    "additionalRules": {
+      "currencyControl": true,
+      "importExportRestrictions": true
+    }
+  },
+  "ecowas": {
+    "regionalHarmonization": true,
+    "crossBorderAgreements": true,
+    "taxAuthority": "ECOWAS",
+    "VAT": 0.15,
+    "withholdingTax": 0.05,
+    "reportingThreshold": 5000,
+    "requiredLicenses": ["ECOWAS Passport"],
+    "additionalRules": {
+      "regionalSettlement": true,
+      "tradeFacilitation": true
+    }
+  },
+  "sadc": {
+    "regionalHarmonization": true,
+    "crossBorderAgreements": true,
+    "taxAuthority": "SADC",
+    "VAT": 0.15,
+    "withholdingTax": 0.10,
+    "reportingThreshold": 10000,
+    "requiredLicenses": ["SADC Regional License"],
+    "additionalRules": {
+      "rtgsIntegration": true,
+      "clearingHouseAccess": true
+    }
+  },
+  "global": {
+    "AML": true,
+    "KYC": true,
+    "SanctionScreening": true,
+    "FATFCompliance": true,
+    "taxAuthority": "FATCA",
+    "VAT": 0.0,
+    "withholdingTax": 0.30,
+    "reportingThreshold": 10000,
+    "requiredLicenses": ["AML Compliance Certificate"],
+    "additionalRules": {
+      "pepScreening": true,
+      "adverseMediaMonitoring": true,
+      "transactionMonitoring": true
+    }
+  },
+  "complianceEngine": {
+    "realTimeScreening": true,
+    "batchProcessing": true,
+    "riskBasedApproach": true,
+    "autoReporting": true,
+    "auditTrail": true,
+    "version": "2025-09-26"
+  }
+}

@@ -18,6 +18,7 @@ import za.co.pms.exception.CurrencyConfigParseException;
 import za.co.pms.exception.CurrencyConfigValidationException;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -50,8 +51,18 @@ public class CurrencyConfigLoader implements ResourceLoaderAware {
         this.resourceLoader = resourceLoader;
     }
 
+    /**
+     * Load and validate config at startup.
+     */
     @PostConstruct
     public void loadCurrencyConfig() {
+        this.currencyConfig = loadCurrencyConfigAndReturn();
+    }
+
+    /**
+     * Load and return CurrencyConfig (with validation).
+     */
+    public CurrencyConfig loadCurrencyConfigAndReturn() {
         try {
             Resource resource = resourceLoader.getResource(resourceLocation);
             if (!resource.exists()) {
@@ -60,25 +71,25 @@ public class CurrencyConfigLoader implements ResourceLoaderAware {
                 );
             }
 
-            CurrencyConfig config = objectMapper.readValue(resource.getInputStream(), CurrencyConfig.class);
+            try (InputStream is = resource.getInputStream()) {
+                CurrencyConfig config = objectMapper.readValue(is, CurrencyConfig.class);
 
-            Set<ConstraintViolation<CurrencyConfig>> violations = validator.validate(config);
-            if (!violations.isEmpty()) {
-                String message = violations.stream()
-                        .map(ConstraintViolation::getMessage)
-                        .collect(Collectors.joining(", "));
-                throw new CurrencyConfigValidationException(
-                        "Currency config validation failed: " + message,violations
-                );
+                Set<ConstraintViolation<CurrencyConfig>> violations = validator.validate(config);
+                if (!violations.isEmpty()) {
+                    String message = violations.stream()
+                            .map(ConstraintViolation::getMessage)
+                            .collect(Collectors.joining(", "));
+                    throw new CurrencyConfigValidationException(
+                            "Currency config validation failed: " + message, violations
+                    );
+                }
+
+                return config;
             }
-
-            this.currencyConfig = config;
-
-        } catch (JsonProcessingException ex) {   // Jackson parse errors
+        } catch (JsonProcessingException ex) {
             throw new CurrencyConfigParseException("Failed to parse currency config", ex);
-        } catch (IOException ex) {               // IO errors
+        } catch (IOException ex) {
             throw new CurrencyConfigException("Unexpected IO error during config loading", ex);
         }
     }
-
 }
