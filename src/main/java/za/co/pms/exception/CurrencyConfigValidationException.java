@@ -2,7 +2,6 @@ package za.co.pms.exception;
 
 import jakarta.validation.ConstraintViolation;
 import lombok.Getter;
-import za.co.pms.config.CurrencyConfig;
 
 import java.io.Serializable;
 import java.util.Set;

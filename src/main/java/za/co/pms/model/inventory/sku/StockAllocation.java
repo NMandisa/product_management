@@ -5,12 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+import za.co.pms.enums.StockStatus;
 import za.co.pms.exception.InsufficientStockException;
+import za.co.pms.model.Auditable;
 import za.co.pms.model.product.Variant;
 
-import java.time.LocalDateTime;
+import java.io.Serializable;
 
 /**
  * @author NMMkhungo
@@ -20,7 +20,10 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-public class StockAllocation {
+@Table(name = "stock_allocation")
+@AllArgsConstructor
+@NoArgsConstructor
+public class StockAllocation extends Auditable implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(nullable = false)
@@ -40,43 +43,169 @@ public class StockAllocation {
             joinColumns = @JoinColumn(name = "media_asset_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "product_variant_id", referencedColumnName = "id",foreignKey=@ForeignKey(name = "stock_allocations_variant_fk")
             ))
-    private Variant productVariant;
+    private Variant variant;
 
-    private int quantity;
-    private int reservedQuantity;
+    @Column(name = "quantity", nullable = false)
+    private int quantity = 0;
+
+    @Column(name = "reserved_quantity", nullable = false)
+    private int reservedQuantity = 0;
 
     @Version
     private Long version;
 
-    @CreatedDate
-    private LocalDateTime createdAt;
+    // Business methods
+    @Column(name = "allocated_quantity", nullable = false)
+    private int allocatedQuantity = 0;
 
-    @LastModifiedDate
-    private LocalDateTime updatedAt;
+    @Column(name = "in_transit_quantity", nullable = false)
+    private int inTransitQuantity = 0;
+
+    @Column(name = "safety_stock", nullable = false)
+    private int safetyStock = 0;
+
+    @Column(name = "reorder_point", nullable = false)
+    private int reorderPoint = 0;
+
+    @Column(name = "max_stock_level")
+    private Integer maxStockLevel;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "stock_status", nullable = false)
+    private StockStatus stockStatus = StockStatus.ACTIVE;
+
+    // Regional stock allocation (for multi-region inventory)
+    @Column(name = "region_code", length = 5)
+    private String regionCode; // ZA, NG, KE, etc.
+
+    @Column(name = "is_primary_allocation")
+    private Boolean isPrimaryAllocation = false;
 
     // Business methods
     public int getAvailableQuantity() {
+        return quantity - reservedQuantity - allocatedQuantity;
+    }
+
+    public int getNetQuantity() {
         return quantity - reservedQuantity;
     }
 
     public void reserve(int amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Reserve amount must be positive");
+        }
         if (amount > getAvailableQuantity()) {
-            throw new InsufficientStockException("Not enough available stock");
+            throw new InsufficientStockException(
+                    String.format("Not enough available stock. Requested: %d, Available: %d",
+                            amount, getAvailableQuantity()));
         }
         reservedQuantity += amount;
+        updateStockStatus();
+    }
+
+    public void allocate(int amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Allocate amount must be positive");
+        }
+        if (amount > getAvailableQuantity()) {
+            throw new InsufficientStockException(
+                    String.format("Not enough available stock for allocation. Requested: %d, Available: %d",
+                            amount, getAvailableQuantity()));
+        }
+        allocatedQuantity += amount;
+        updateStockStatus();
     }
 
     public void release(int amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Release amount must be positive");
+        }
         if (amount > reservedQuantity) {
-            throw new IllegalArgumentException("Cannot release more than reserved");
+            throw new IllegalArgumentException(
+                    String.format("Cannot release more than reserved. Requested: %d, Reserved: %d",
+                            amount, reservedQuantity));
         }
         reservedQuantity -= amount;
+        updateStockStatus();
+    }
+
+    public void deallocate(int amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Deallocate amount must be positive");
+        }
+        if (amount > allocatedQuantity) {
+            throw new IllegalArgumentException(
+                    String.format("Cannot deallocate more than allocated. Requested: %d, Allocated: %d",
+                            amount, allocatedQuantity));
+        }
+        allocatedQuantity -= amount;
+        updateStockStatus();
     }
 
     public void adjustQuantity(int newQuantity) {
-        if (newQuantity < reservedQuantity) {
-            throw new IllegalArgumentException("New quantity cannot be less than reserved quantity");
+        if (newQuantity < 0) {
+            throw new IllegalArgumentException("Quantity cannot be negative");
+        }
+        if (newQuantity < (reservedQuantity + allocatedQuantity)) {
+            throw new IllegalArgumentException(
+                    String.format("New quantity cannot be less than reserved + allocated. New: %d, Reserved+Allocated: %d",
+                            newQuantity, reservedQuantity + allocatedQuantity));
         }
         this.quantity = newQuantity;
+        updateStockStatus();
+    }
+
+    public void receiveStock(int receivedQuantity) {
+        if (receivedQuantity <= 0) {
+            throw new IllegalArgumentException("Received quantity must be positive");
+        }
+        this.quantity += receivedQuantity;
+        updateStockStatus();
+    }
+
+    public void shipStock(int shippedQuantity) {
+        if (shippedQuantity <= 0) {
+            throw new IllegalArgumentException("Shipped quantity must be positive");
+        }
+        if (shippedQuantity > getNetQuantity()) {
+            throw new InsufficientStockException(
+                    String.format("Not enough stock to ship. Requested: %d, Net Quantity: %d",
+                            shippedQuantity, getNetQuantity()));
+        }
+        this.quantity -= shippedQuantity;
+        updateStockStatus();
+    }
+
+    private void updateStockStatus() {
+        if (quantity <= 0) {
+            stockStatus = StockStatus.OUT_OF_STOCK;
+        } else if (quantity <= safetyStock) {
+            stockStatus = StockStatus.LOW_STOCK;
+        } else if (maxStockLevel != null && quantity >= maxStockLevel) {
+            stockStatus = StockStatus.OVERSTOCKED;
+        } else if (quantity <= reorderPoint) {
+            stockStatus = StockStatus.REORDER_NEEDED;
+        } else {
+            stockStatus = StockStatus.ACTIVE;
+        }
+    }
+
+    public boolean needsReorder() {
+        return quantity <= reorderPoint && stockStatus == StockStatus.REORDER_NEEDED;
+    }
+
+    public int calculateReorderQuantity() {
+        if (maxStockLevel == null) {
+            return reorderPoint - quantity + safetyStock;
+        }
+        return Math.max(reorderPoint - quantity + safetyStock, maxStockLevel - quantity);
+    }
+
+    // SA-Specific business method for regional compliance
+    public boolean isCompliantForRegion(String targetRegionCode) {
+        if (regionCode == null || targetRegionCode == null) {
+            return true; // No regional restrictions
+        }
+        return regionCode.equals(targetRegionCode) || isPrimaryAllocation;
     }
 }

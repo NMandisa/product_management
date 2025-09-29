@@ -1,0 +1,10 @@
+package za.co.pms.enums;
+
+/**
+ * @author NMMkhungo
+ * @since 2025/09/28
+ **/
+public enum Region {
+    SOUTHERN_AFRICA, WEST_AFRICA, EAST_AFRICA,EUROPE,SOUTHERN_AMERICA,NOTHERN_AMERICA,
+    ASIA, NORTH_AFRICA, CENTRAL_AFRICA, GLOBAL_RESERVE, EMERGING_MARKETS
+}

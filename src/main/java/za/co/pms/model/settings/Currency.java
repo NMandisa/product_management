@@ -2,6 +2,8 @@ package za.co.pms.model.settings;
 
 import jakarta.persistence.*;
 import lombok.*;
+import za.co.pms.enums.Region;
+import za.co.pms.enums.CurrencyStatus;
 import za.co.pms.model.settings.currency.CurrencyFormatting;
 import za.co.pms.model.settings.currency.CurrencyFxRules;
 import za.co.pms.model.settings.currency.RegionalHierarchy;
@@ -36,14 +38,16 @@ public class Currency {
     @Column(name = "compliance_ref")
     private String complianceRef;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private String status;
+    private CurrencyStatus status;
 
     @Column(name = "priority")
     private Integer priority;
 
-    @Column(name = "region")
-    private String region;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "region" , nullable = false)
+    private Region region;
 
     @Column(name = "central_bank")
     private String centralBank;
@@ -51,10 +55,10 @@ public class Currency {
     @Column(name = "digital_maturity")
     private String digitalMaturity;
 
-    @OneToOne(mappedBy = "currency", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "currency", cascade = CascadeType.ALL)
     private CurrencyFormatting formatting;
 
-    @OneToOne(mappedBy = "currency", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "currency", cascade = CascadeType.ALL)
     private CurrencyFxRules fxRules;
 
     @ManyToMany(mappedBy = "currencies")

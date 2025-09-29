@@ -3,6 +3,7 @@ package za.co.pms.model.product;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import za.co.pms.exception.PriceNotFoundException;
 import za.co.pms.model.Product;
 import za.co.pms.model.inventory.sku.StockAllocation;
 
@@ -26,23 +27,38 @@ public class Variant {
     //@Column(columnDefinition = "json")
     //private Map<String, String> attributes;
 
+    // Fix product relationship
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "product_has_variants",
-            joinColumns = @JoinColumn(name = "variant_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "product_id", referencedColumnName = "id",foreignKey=@ForeignKey(name = "product_variants_fk")
-            ))
+    @JoinColumn(name = "product_id")
     private Product product;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "sku_id")
     private Sku sku;
 
-    @OneToMany(mappedBy = "productVariant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "variant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<StockAllocation> stockAllocations = new HashSet<>();
 
-    @OneToMany(mappedBy = "variant")
+    @OneToMany(mappedBy = "variant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Price> prices = new HashSet<>();
+
+    // Add method to get current price
+    public Price getCurrentPrice() {
+        return prices.stream()
+                .filter(Price::isCurrent)
+                .filter(Price::isEffective)
+                .findFirst()
+                .orElseThrow(() -> new PriceNotFoundException("No current price found for variant: " + id));
+    }
+
+    public Price getCurrentPriceInCurrency(String currencyCode) {
+        return prices.stream()
+                .filter(price -> currencyCode.equals(price.getCurrencyCode()))
+                .filter(Price::isCurrent)
+                .filter(Price::isEffective)
+                .findFirst()
+                .orElseThrow(() -> new PriceNotFoundException("No current price found for currency: " + currencyCode));
+    }
 
     public void addPrice(Price price) {
         prices.add(price);
@@ -57,12 +73,12 @@ public class Variant {
     // Helper methods
     public void addStockAllocation(StockAllocation allocation) {
         stockAllocations.add(allocation);
-        allocation.setProductVariant(this);
+        allocation.setVariant(this);
     }
 
     public void removeStockAllocation(StockAllocation allocation) {
         stockAllocations.remove(allocation);
-        allocation.setProductVariant(null);
+        allocation.setVariant(null);
     }
 
     // Business methods

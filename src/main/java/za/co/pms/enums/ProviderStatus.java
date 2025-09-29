@@ -1,4 +1,4 @@
-package za.co.nextgig.enums;
+package za.co.pms.enums;
 
 /**
  * @author NMMkhungo

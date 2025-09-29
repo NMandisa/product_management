@@ -4,6 +4,8 @@ import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import za.co.pms.enums.Region;
+import za.co.pms.enums.CurrencyStatus;
 import za.co.pms.model.settings.Currency;
 import za.co.pms.model.settings.currency.*;
 import za.co.pms.repository.*;
@@ -125,9 +127,9 @@ public class CurrencyDataInitializer {
         zar.setName("South African Rand");
         zar.setPrecision(2);
         zar.setComplianceRef("southAfrica");
-        zar.setStatus("ACTIVE");
+        zar.setStatus(CurrencyStatus.ACTIVE);
         zar.setPriority(1);
-        zar.setRegion("southernAfrica");
+        zar.setRegion(Region.SOUTHERN_AFRICA);
         zar.setCentralBank("SARB");
         zar.setDigitalMaturity("HIGH");
 
@@ -176,9 +178,9 @@ public class CurrencyDataInitializer {
         ngn.setName("Nigerian Naira");
         ngn.setPrecision(0);
         ngn.setComplianceRef("nigeria");
-        ngn.setStatus("ACTIVE");
+        ngn.setStatus(CurrencyStatus.ACTIVE);
         ngn.setPriority(2);
-        ngn.setRegion("westAfrica");
+        ngn.setRegion(Region.WEST_AFRICA);
         ngn.setCentralBank("CBN");
         ngn.setDigitalMaturity("HIGH");
 
@@ -217,9 +219,9 @@ public class CurrencyDataInitializer {
         kes.setName("Kenyan Shilling");
         kes.setPrecision(0);
         kes.setComplianceRef("kenya");
-        kes.setStatus("ACTIVE");
+        kes.setStatus(CurrencyStatus.ACTIVE);
         kes.setPriority(3);
-        kes.setRegion("eastAfrica");
+        kes.setRegion(Region.EAST_AFRICA);
         kes.setCentralBank("CBK");
         kes.setDigitalMaturity("HIGH");
 
@@ -258,9 +260,9 @@ public class CurrencyDataInitializer {
         ghs.setName("Ghanaian Cedi");
         ghs.setPrecision(2);
         ghs.setComplianceRef("ghana");
-        ghs.setStatus("ACTIVE");
+        ghs.setStatus(CurrencyStatus.ACTIVE);
         ghs.setPriority(4);
-        ghs.setRegion("westAfrica");
+        ghs.setRegion(Region.WEST_AFRICA);
         ghs.setCentralBank("BOG");
 
         CurrencyFormatting ghsFormatting = new CurrencyFormatting();
@@ -296,9 +298,9 @@ public class CurrencyDataInitializer {
         usd.setName("US Dollar");
         usd.setPrecision(2);
         usd.setComplianceRef("global");
-        usd.setStatus("ACTIVE");
+        usd.setStatus(CurrencyStatus.ACTIVE);
         usd.setPriority(5);
-        usd.setRegion("globalReserve");
+        usd.setRegion(Region.GLOBAL_RESERVE);
 
         CurrencyFormatting usdFormatting = new CurrencyFormatting();
         usdFormatting.setCurrency(usd);
@@ -352,36 +354,35 @@ public class CurrencyDataInitializer {
                 .orElseThrow(() -> new RuntimeException("USD currency not found"));
 
         // Get other currencies or create them if they don't exist
-        Currency eur = currencyRepository.findByCurrencyCode("EUR").orElseGet(() -> createCurrency("EUR", "Euro", "€", 2, "europe", "ECB"));
-        Currency gbp = currencyRepository.findByCurrencyCode("GBP").orElseGet(() -> createCurrency("GBP", "British Pound", "£", 2, "europe", "BOE"));
-        Currency cny = currencyRepository.findByCurrencyCode("CNY").orElseGet(() -> createCurrency("CNY", "Chinese Yuan", "¥", 2, "asia", "PBOC"));
+        Currency eur = currencyRepository.findByCurrencyCode("EUR").orElseGet(() -> createCurrency("EUR", "Euro", "€", 2, Region.EUROPE, "ECB"));
+        Currency gbp = currencyRepository.findByCurrencyCode("GBP").orElseGet(() -> createCurrency("GBP", "British Pound", "£", 2, Region.EUROPE, "BOE"));
+        Currency cny = currencyRepository.findByCurrencyCode("CNY").orElseGet(() -> createCurrency("CNY", "Chinese Yuan", "¥", 2, Region.ASIA, "PBOC"));
 
         // Create additional African currencies
-        Currency bwp = currencyRepository.findByCurrencyCode("BWP").orElseGet(() -> createCurrency("BWP", "Botswana Pula", "P", 2, "southernAfrica", "BOB"));
-        Currency mzn = currencyRepository.findByCurrencyCode("MZN").orElseGet(() -> createCurrency("MZN", "Mozambican Metical", "MT", 2, "southernAfrica", "BM"));
-        Currency zmw = currencyRepository.findByCurrencyCode("ZMW").orElseGet(() -> createCurrency("ZMW", "Zambian Kwacha", "ZK", 2, "southernAfrica", "BOZ"));
-        Currency mwk = currencyRepository.findByCurrencyCode("MWK").orElseGet(() -> createCurrency("MWK", "Malawian Kwacha", "MK", 2, "southernAfrica", "RBM"));
-        Currency nad = currencyRepository.findByCurrencyCode("NAD").orElseGet(() -> createCurrency("NAD", "Namibian Dollar", "N$", 2, "southernAfrica", "BON"));
+        Currency bwp = currencyRepository.findByCurrencyCode("BWP").orElseGet(() -> createCurrency("BWP", "Botswana Pula", "P", 2, Region.SOUTHERN_AFRICA, "BOB"));
+        Currency mzn = currencyRepository.findByCurrencyCode("MZN").orElseGet(() -> createCurrency("MZN", "Mozambican Metical", "MT", 2, Region.SOUTHERN_AFRICA, "BM"));
+        Currency zmw = currencyRepository.findByCurrencyCode("ZMW").orElseGet(() -> createCurrency("ZMW", "Zambian Kwacha", "ZK", 2, Region.SOUTHERN_AFRICA, "BOZ"));
+        Currency mwk = currencyRepository.findByCurrencyCode("MWK").orElseGet(() -> createCurrency("MWK", "Malawian Kwacha", "MK", 2, Region.SOUTHERN_AFRICA, "RBM"));
+        Currency nad = currencyRepository.findByCurrencyCode("NAD").orElseGet(() -> createCurrency("NAD", "Namibian Dollar", "N$", 2, Region.SOUTHERN_AFRICA, "BON"));
 
-        Currency xof = currencyRepository.findByCurrencyCode("XOF").orElseGet(() -> createCurrency("XOF", "West African CFA Franc", "CFA", 0, "westAfrica", "BCEAO"));
-        Currency xaf = currencyRepository.findByCurrencyCode("XAF").orElseGet(() -> createCurrency("XAF", "Central African CFA Franc", "FCFA", 0, "westAfrica", "BEAC"));
-        Currency gnf = currencyRepository.findByCurrencyCode("GNF").orElseGet(() -> createCurrency("GNF", "Guinean Franc", "FG", 0, "westAfrica", "BCRG"));
+        Currency xof = currencyRepository.findByCurrencyCode("XOF").orElseGet(() -> createCurrency("XOF", "West African CFA Franc", "CFA", 0, Region.WEST_AFRICA, "BCEAO"));
+        Currency xaf = currencyRepository.findByCurrencyCode("XAF").orElseGet(() -> createCurrency("XAF", "Central African CFA Franc", "FCFA", 0, Region.WEST_AFRICA, "BEAC"));
+        Currency gnf = currencyRepository.findByCurrencyCode("GNF").orElseGet(() -> createCurrency("GNF", "Guinean Franc", "FG", 0, Region.WEST_AFRICA, "BCRG"));
 
-        Currency tzs = currencyRepository.findByCurrencyCode("TZS").orElseGet(() -> createCurrency("TZS", "Tanzanian Shilling", "TSh", 2, "eastAfrica", "BOT"));
-        Currency ugx = currencyRepository.findByCurrencyCode("UGX").orElseGet(() -> createCurrency("UGX", "Ugandan Shilling", "USh", 0, "eastAfrica", "BOU"));
-        Currency rwf = currencyRepository.findByCurrencyCode("RWF").orElseGet(() -> createCurrency("RWF", "Rwandan Franc", "FRw", 0, "eastAfrica", "BNR"));
-        Currency etb = currencyRepository.findByCurrencyCode("ETB").orElseGet(() -> createCurrency("ETB", "Ethiopian Birr", "Br", 2, "eastAfrica", "NBE"));
+        Currency tzs = currencyRepository.findByCurrencyCode("TZS").orElseGet(() -> createCurrency("TZS", "Tanzanian Shilling", "TSh", 2, Region.EAST_AFRICA, "BOT"));
+        Currency rwf = currencyRepository.findByCurrencyCode("RWF").orElseGet(() -> createCurrency("RWF", "Rwandan Franc", "FRw", 0, Region.EAST_AFRICA, "BNR"));
+        Currency etb = currencyRepository.findByCurrencyCode("ETB").orElseGet(() -> createCurrency("ETB", "Ethiopian Birr", "Br", 2, Region.EAST_AFRICA, "NBE"));
 
-        Currency egp = currencyRepository.findByCurrencyCode("EGP").orElseGet(() -> createCurrency("EGP", "Egyptian Pound", "E£", 2, "northAfrica", "CBE"));
-        Currency mad = currencyRepository.findByCurrencyCode("MAD").orElseGet(() -> createCurrency("MAD", "Moroccan Dirham", "DH", 2, "northAfrica", "BAM"));
-        Currency dzd = currencyRepository.findByCurrencyCode("DZD").orElseGet(() -> createCurrency("DZD", "Algerian Dinar", "DA", 2, "northAfrica", "BADR"));
-        Currency tnd = currencyRepository.findByCurrencyCode("TND").orElseGet(() -> createCurrency("TND", "Tunisian Dinar", "DT", 3, "northAfrica", "BCT"));
+        Currency egp = currencyRepository.findByCurrencyCode("EGP").orElseGet(() -> createCurrency("EGP", "Egyptian Pound", "E£", 2, Region.NORTH_AFRICA, "CBE"));
+        Currency mad = currencyRepository.findByCurrencyCode("MAD").orElseGet(() -> createCurrency("MAD", "Moroccan Dirham", "DH", 2, Region.NORTH_AFRICA, "BAM"));
+        Currency dzd = currencyRepository.findByCurrencyCode("DZD").orElseGet(() -> createCurrency("DZD", "Algerian Dinar", "DA", 2, Region.NORTH_AFRICA, "BADR"));
+        Currency tnd = currencyRepository.findByCurrencyCode("TND").orElseGet(() -> createCurrency("TND", "Tunisian Dinar", "DT", 3, Region.NORTH_AFRICA, "BCT"));
 
         // Emerging markets currencies
-        Currency inr = currencyRepository.findByCurrencyCode("INR").orElseGet(() -> createCurrency("INR", "Indian Rupee", "₹", 2, "asia", "RBI"));
-        Currency brl = currencyRepository.findByCurrencyCode("BRL").orElseGet(() -> createCurrency("BRL", "Brazilian Real", "R$", 2, "southAmerica", "BCB"));
-        Currency trl = currencyRepository.findByCurrencyCode("TRY").orElseGet(() -> createCurrency("TRY", "Turkish Lira", "₺", 2, "europe", "CBRT"));
-        Currency mxn = currencyRepository.findByCurrencyCode("MXN").orElseGet(() -> createCurrency("MXN", "Mexican Peso", "$", 2, "northAmerica", "BdM"));
+        Currency inr = currencyRepository.findByCurrencyCode("INR").orElseGet(() -> createCurrency("INR", "Indian Rupee", "₹", 2,Region.ASIA, "RBI"));
+        Currency brl = currencyRepository.findByCurrencyCode("BRL").orElseGet(() -> createCurrency("BRL", "Brazilian Real", "R$", 2, Region.SOUTHERN_AMERICA, "BCB"));
+        Currency trl = currencyRepository.findByCurrencyCode("TRY").orElseGet(() -> createCurrency("TRY", "Turkish Lira", "₺", 2, Region.EUROPE, "CBRT"));
+        Currency mxn = currencyRepository.findByCurrencyCode("MXN").orElseGet(() -> createCurrency("MXN", "Mexican Peso", "$", 2, Region.NOTHERN_AMERICA, "BdM"));
 
         // Southern Africa Regional Hierarchy
         RegionalHierarchy southernAfrica = new RegionalHierarchy();
@@ -398,7 +399,8 @@ public class CurrencyDataInitializer {
         // East Africa Regional Hierarchy
         RegionalHierarchy eastAfrica = new RegionalHierarchy();
         eastAfrica.setRegionName("eastAfrica");
-        eastAfrica.setCurrencies(Set.of(kes, tzs, ugx, rwf, etb));
+        //eastAfrica.setCurrencies(Set.of(kes, tzs, ugx, rwf, etb));
+        eastAfrica.setCurrencies(Set.of(kes, tzs, rwf, etb));
         regionalHierarchyRepository.save(eastAfrica);
 
         // North Africa Regional Hierarchy
@@ -420,7 +422,7 @@ public class CurrencyDataInitializer {
         regionalHierarchyRepository.save(emergingMarkets);
     }
 
-    private Currency createCurrency(String code, String name, String symbol, int precision, String region, String centralBank) {
+    private Currency createCurrency(String code, String name, String symbol, int precision, Region region, String centralBank) {
         Currency currency = new Currency();
         currency.setCode(code);
         currency.setName(name);
@@ -428,7 +430,7 @@ public class CurrencyDataInitializer {
         currency.setPrecision(precision);
         currency.setRegion(region);
         currency.setCentralBank(centralBank);
-        currency.setStatus("ACTIVE");
+        currency.setStatus(CurrencyStatus.ACTIVE);
         currency.setPriority(99); // Default priority for auto-created currencies
 
         // Create basic formatting

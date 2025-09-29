@@ -7,26 +7,29 @@ import lombok.Setter;
 import org.springframework.util.StringUtils;
 import za.co.pms.enums.PriceType;
 import za.co.pms.enums.PromotionType;
+import za.co.pms.enums.Region;
+import za.co.pms.exception.CurrencyNotSupportedException;
 import za.co.pms.model.product.Price;
 import za.co.pms.model.product.PriceChange;
 import za.co.pms.model.product.Variant;
 import za.co.pms.model.promotion.Rule;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author NMMkhungo
  * @since 2025/09/14
  **/
-@Entity
-@Table(name = "promotions")
 @Getter
 @Setter
-public class Promotion {
+@Entity
+@Table(name = "promotions")
+@DiscriminatorValue("prices_table")
+public class Promotion extends Auditable implements Serializable {
     @Id
     @Column(nullable = false)
     private Long id;
@@ -35,9 +38,21 @@ public class Promotion {
     @Size(max = 255)
     private String name;
 
-    @NotBlank
-    @Size(max = 1000)
-    private String description;
+    // Localized descriptions
+    @ElementCollection
+    @CollectionTable(name = "promotion_localizations",
+            joinColumns = @JoinColumn(name = "promotion_id"))
+    @MapKeyColumn(name = "language_code")
+    @Column(name = "description", columnDefinition = "TEXT")
+    private Map<String, String> localizedDescriptions = new HashMap<>();
+
+    // Currency-specific discount values
+    @ElementCollection
+    @CollectionTable(name = "promotion_currency_discounts",
+            joinColumns = @JoinColumn(name = "promotion_id"))
+    @MapKeyColumn(name = "currency_code")
+    @Column(name = "discount_value", precision = 19, scale = 4)
+    private Map<String, BigDecimal> currencyDiscounts = new HashMap<>();
 
     // SA-Specific Compliance Fields
     @Pattern(regexp = "SARS\\d{9}")
@@ -54,10 +69,26 @@ public class Promotion {
 
     @Enumerated(EnumType.STRING)
     @NotNull
-    @Column(nullable = false)
-    private PromotionType type; // {BOGO, MULTIBUY, FREE_SAMPLE, PERCENTAGE, FIXED}
+    private PromotionType type;
 
-    // Core promotion parameters with validation groups
+    // Regional restrictions - use String for region codes
+    @ElementCollection
+    @CollectionTable(name = "promotion_allowed_regions")
+    @Column(name = "region_code")
+    private Set<String> allowedRegions = new HashSet<>();
+
+    @ElementCollection
+    @CollectionTable(name = "promotion_excluded_regions")
+    @Column(name = "region_code")
+    private Set<String> excludedRegions = new HashSet<>();
+
+    // Currency restrictions
+    @ElementCollection
+    @CollectionTable(name = "promotion_allowed_currencies")
+    @Column(name = "currency_code")
+    private Set<String> allowedCurrencies = new HashSet<>();
+
+    // Core promotion parameters
     @Min(value = 1)
     private Integer requiredQuantity;
 
@@ -67,13 +98,15 @@ public class Promotion {
     @DecimalMin(value = "0.0")
     private BigDecimal discountValue;
 
-    // One-to-Many relationship with PriceChanges
+    // Relationships
     @OneToMany(mappedBy = "promotion", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PriceChange> priceChanges = new LinkedHashSet<>();
 
+    @OneToMany(mappedBy = "promotion", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Rule> rules = new LinkedHashSet<>();
+
     // SA-Specific Compliance Fields
-    @Column(nullable = false)
-    private boolean cpaCompliantDisplay; // Must be true for SA launches
+    private boolean cpaCompliantDisplay = true;
 
     // Promotion validity
     @NotNull
@@ -83,27 +116,22 @@ public class Promotion {
     @Future
     private LocalDateTime endDate;
 
-    // One-to-Many relationship with PromotionRules
-    @OneToMany(mappedBy = "promotion", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Rule> rules =new LinkedHashSet<>();
-
-    // SA-Specific Business Methods
-    public boolean isEligibleForVariant(Variant variant) {
-        // Check if promotion is active
-        if (!isActive()) {
+    // Business methods with currency awareness
+    public boolean isEligibleForRegion(String regionCode) {
+        if (!excludedRegions.isEmpty() && excludedRegions.contains(regionCode)) {
             return false;
         }
-
-        // Check variant-specific rules
-        if (rules.stream().anyMatch(rule -> !rule.isSatisfiedBy(variant))) {
-            return false;
-        }
-
-        // Check regulatory compliance
-        return !variant.hasRestrictedCategory() || isCompliantWithRestrictions();
+        return allowedRegions.isEmpty() || allowedRegions.contains(regionCode);
     }
 
-    // Business Methods
+    public boolean isEligibleForCurrency(String currencyCode) {
+        return allowedCurrencies.isEmpty() || allowedCurrencies.contains(currencyCode);
+    }
+
+    public BigDecimal getDiscountValue(String currencyCode) {
+        return currencyDiscounts.getOrDefault(currencyCode, discountValue);
+    }
+
     public String getCpaCompliantDescription() {
         return switch (type) {
             case BOGO -> String.format("Buy %d, Get %d FREE (%.2f%% saving)",
@@ -111,8 +139,16 @@ public class Promotion {
             case MULTIBUY -> String.format("Get %d for the price of %d (%.2f%% saving)",
                     requiredQuantity + freeQuantity, requiredQuantity, calculateSavingsPercentage());
             case FREE_SAMPLE -> "FREE sample with purchase (zero-rated for VAT)";
-            default -> description;
+            case PERCENTAGE -> String.format("%.0f%% OFF", discountValue);
+            case FIXED -> String.format("%s OFF", formatCurrency(discountValue, "ZAR"));
+            default -> name;
         };
+    }
+
+    private String formatCurrency(BigDecimal amount, String currencyCode) {
+        // Use your currency formatting service here
+        //return CurrencyFormatter.format(amount, currencyCode);
+        return null;
     }
 
     public boolean isActive() {
@@ -121,40 +157,60 @@ public class Promotion {
     }
 
     public BigDecimal calculateSavingsPercentage() {
+        if (requiredQuantity == null || freeQuantity == null || requiredQuantity == 0) {
+            return BigDecimal.ZERO;
+        }
         return BigDecimal.valueOf(freeQuantity)
                 .divide(BigDecimal.valueOf(requiredQuantity + freeQuantity), 4, RoundingMode.HALF_UP)
                 .multiply(BigDecimal.valueOf(100));
     }
 
-    public Price createDiscountedPrice(Variant variant, Price currentPrice) {
-        BigDecimal discountedPrice = calculateDiscountedPrice(currentPrice.getBasePrice());
+    public Price applyToVariant(Variant variant, String targetCurrencyCode) {
+        if (!isEligibleForCurrency(targetCurrencyCode)) {
+            throw new CurrencyNotSupportedException(
+                    "Promotion not available for currency: " + targetCurrencyCode);
+        }
 
-        Price price = new Price();
-        price.setVariant(variant);
-        price.setBasePrice(discountedPrice);
-        price.setTaxClass(currentPrice.getTaxClass());
-        price.setEffectiveFrom(LocalDateTime.now());
-        price.setPriceType(PriceType.PROMOTIONAL);
-        price.setPriceSource("PROMOTION-" + this.id);
-        price.setCurrent(true);
-        return price;
+        Price currentPrice = variant.getCurrentPrice();
+        BigDecimal discount = getDiscountValue(targetCurrencyCode);
+
+        Price discountedPrice = createDiscountedPrice(currentPrice, discount, targetCurrencyCode);
+        discountedPrice.setPriceSource("PROMOTION-" + this.id);
+
+        return discountedPrice;
     }
 
-    // SA-Specific Compliance Check
-    public boolean isCpaCompliant() {
-        return !StringUtils.isEmpty(description) &&
-                description.contains("Price includes 15% VAT");
+    private Price createDiscountedPrice(Price basePrice, BigDecimal discount, String currencyCode) {
+        BigDecimal discountedAmount = calculateDiscountedAmount(basePrice.getFinalPrice(), discount);
+
+        Price newPrice = new Price();
+        newPrice.setVariant(basePrice.getVariant());
+        newPrice.setBasePrice(discountedAmount);
+        newPrice.setCurrencyCode(currencyCode);
+        newPrice.setPriceType(PriceType.PROMOTIONAL);
+        newPrice.setTaxClass(basePrice.getTaxClass());
+        //newPrice.setVatRate(basePrice.getVatRate());
+        newPrice.setEffectiveFrom(LocalDateTime.now());
+        newPrice.setCurrent(true);
+
+        return newPrice;
     }
 
-    private BigDecimal calculateDiscountedPrice(BigDecimal basePrice) {
+    private BigDecimal calculateDiscountedAmount(BigDecimal baseAmount, BigDecimal discount) {
         return switch (type) {
-            //case BOGO, MULTIBUY -> calculateEffectivePrice(new Price(basePrice));
-            case PERCENTAGE -> basePrice.multiply(BigDecimal.ONE.subtract(
-                    discountValue.divide(new BigDecimal(100), 4, RoundingMode.HALF_UP)));
-            case FIXED -> basePrice.subtract(discountValue).max(BigDecimal.ZERO);
-            case FREE_SAMPLE -> BigDecimal.ZERO;
-            default -> basePrice;
+            case PERCENTAGE -> baseAmount.multiply(
+                    BigDecimal.ONE.subtract(discount.divide(new BigDecimal(100), 4, RoundingMode.HALF_UP)));
+            case FIXED -> baseAmount.subtract(discount).max(BigDecimal.ZERO);
+            default -> baseAmount;
         };
+    }
+
+    public String getLocalizedDescription(String languageCode, String regionCode) {
+        String specificKey = languageCode + "_" + regionCode;
+        if (localizedDescriptions.containsKey(specificKey)) {
+            return localizedDescriptions.get(specificKey);
+        }
+        return localizedDescriptions.getOrDefault(languageCode, getCpaCompliantDescription());
     }
 
     @PrePersist
@@ -176,25 +232,8 @@ public class Promotion {
         }
     }
 
-    public BigDecimal calculateEffectivePrice(Price basePrice) {
-        return switch (type) {
-            case BOGO, MULTIBUY -> basePrice.getBasePrice()
-                    .multiply(new BigDecimal(requiredQuantity))
-                    .divide(new BigDecimal(requiredQuantity + freeQuantity), 2, RoundingMode.HALF_UP);
-            default -> basePrice.getBasePrice();
-        };
-    }
-
-    public boolean isCompliantWithRestrictions() {
-        // Implement SA-specific regulatory checks
-        return cpaCompliantDisplay &&
-                description != null &&
-                description.contains("Price includes 15% VAT");
-    }
-
     public void addPriceChange(PriceChange priceChange) {
         priceChanges.add(priceChange);
         priceChange.setPromotion(this);
     }
-
 }
