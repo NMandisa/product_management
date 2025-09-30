@@ -2,8 +2,6 @@ package za.co.pms.util;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import za.co.pms.config.CurrencyConfig;
-import za.co.pms.dto.RegionalContext;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,15 +15,15 @@ import java.util.List;
 @Component
 public class RegionalCurrencyUtil {
 
-    private final CurrencyConfig masterConfig;
+    //private final CurrencyConfig masterConfig;
 
     /**
      * Constructor injecting the master currency configuration.
      * @param masterConfig Master CurrencyConfig bean.
      */
-    public RegionalCurrencyUtil(CurrencyConfig masterConfig) {
+    /*public RegionalCurrencyUtil(CurrencyConfig masterConfig) {
         this.masterConfig = masterConfig;
-    }
+    }*/
 
     /**
      * Builds a regional context for a given country code.
@@ -33,7 +31,7 @@ public class RegionalCurrencyUtil {
      * @param countryCode ISO country code (e.g., "ZA", "NG").
      * @return RegionalContext object containing all regional settings.
      */
-    public RegionalContext getRegionalContext(String countryCode) {
+    /*public RegionalContext getRegionalContext(String countryCode) {
         if (countryCode == null || masterConfig == null) {
             throw new IllegalArgumentException("Country code and masterConfig cannot be null");
         }
@@ -52,15 +50,15 @@ public class RegionalCurrencyUtil {
                 .complianceRules(getRegionalCompliance(countryCode))
                 .paymentMethods(getRegionalPaymentMethods(countryCode))
                 .build();
-    }
+    }*/
 
     /**
      * Maps a country code to its regional compliance rules.
      * @param countryCode ISO country code
      * @return Compliance rules for the region
      */
-    private CurrencyConfig.Compliance getRegionalCompliance(String countryCode) {
-        if (masterConfig.getCompliance() == null) return null;
+   /* private CurrencyConfig.Compliance getRegionalCompliance(String countryCode) {
+        if (masterConfig.getCompliance() == null) return null;*/
 
 //        switch (countryCode) {
 //            case "ZA": return masterConfig.getCompliance().getSouthAfrica();
@@ -71,8 +69,8 @@ public class RegionalCurrencyUtil {
 //                        ? masterConfig.getCompliance().getEurope()
 //                        : masterConfig.getCompliance().getGlobal();
 //        }
-        return null;
-    }
+     /*   return null;
+    }*/
 
     /**
      * Returns payment methods for a region based on country code.
@@ -80,7 +78,7 @@ public class RegionalCurrencyUtil {
      * @param countryCode ISO country code
      * @return List of payment methods
      */
-    List<String> getRegionalPaymentMethods(String countryCode) {
+    /*List<String> getRegionalPaymentMethods(String countryCode) {
         if (masterConfig.getPaymentMethods() == null) return Collections.emptyList();
 
         switch (countryCode) {
@@ -90,7 +88,7 @@ public class RegionalCurrencyUtil {
             case "FR": case "DE": case "IT": case "ES": case "GB": return masterConfig.getPaymentMethods().getEurope();
             default: return masterConfig.getPaymentMethods().getGlobal();
         }
-    }
+    }*/
 
     /**
      * Determines if a country code belongs to Europe.

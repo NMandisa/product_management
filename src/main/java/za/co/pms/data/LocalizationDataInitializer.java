@@ -2,14 +2,20 @@ package za.co.pms.data;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import za.co.pms.enums.RegionCode;
+import za.co.pms.exception.ValidationException;
 import za.co.pms.model.settings.LocalizationEngine;
 import za.co.pms.model.settings.localization.*;
 import za.co.pms.repository.*;
 
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author NMMkhungo
@@ -17,8 +23,10 @@ import java.util.Set;
  **/
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class LocalizationDataInitializer {
 
+    // Group related repositories
     private final LanguageRepository languageRepository;
     private final RegionalSettingsRepository regionalSettingsRepository;
     private final LocalizationConfigRepository localizationConfigRepository;
@@ -27,127 +35,155 @@ public class LocalizationDataInitializer {
     private final TimeFormatConfigRepository timeFormatConfigRepository;
     private final NumberFormatConfigRepository numberFormatConfigRepository;
 
-    public LocalizationDataInitializer(LanguageRepository languageRepository,
-                                       RegionalSettingsRepository regionalSettingsRepository,
-                                       LocalizationConfigRepository localizationConfigRepository,
-                                       CulturalAdaptationsRepository culturalAdaptationsRepository,
-                                       DateFormatConfigRepository dateFormatConfigRepository,
-                                       TimeFormatConfigRepository timeFormatConfigRepository,
-                                       NumberFormatConfigRepository numberFormatConfigRepository){
-    this.localizationConfigRepository=localizationConfigRepository;
-    this.culturalAdaptationsRepository=culturalAdaptationsRepository;
-    this.dateFormatConfigRepository=dateFormatConfigRepository;
-    this.numberFormatConfigRepository=numberFormatConfigRepository;
-    this.regionalSettingsRepository=regionalSettingsRepository;
-    this.languageRepository=languageRepository;
-    this.timeFormatConfigRepository=timeFormatConfigRepository;
-    }
-
     @PostConstruct
-    @Transactional
     public void initialize() {
-        if (localizationConfigRepository.count() == 0) {
-            initializeLanguages();
-            initializeCulturalAdaptations();
-            initializeRegionalSettings();
-            initializeLocalizationConfig();
-            initializeAccessibility();
-            initializeLocalizationEngine();
+        try {
+            if (shouldInitialize()) {
+                log.info("Starting localization data initialization...");
+                initializeData();
+                validateInitialization();
+                log.info("Localization data initialization completed successfully");
+            } else {
+                log.info("Localization data already exists, skipping initialization");
+            }
+        } catch (Exception e) {
+            log.error("Localization data initialization failed", e);
+            // Don't throw exception to allow application to start
+            // In production, you might want to use a circuit breaker pattern here
         }
     }
 
+    private boolean shouldInitialize() {
+        return localizationConfigRepository.count() == 0 &&
+                languageRepository.count() == 0;
+    }
+
+    @Transactional
+    protected void initializeData() {
+        initializeLanguages();
+        initializeCulturalAdaptations();
+        initializeRegionalSettings();
+        initializeLocalizationConfig();
+    }
+
+    private void validateInitialization() {
+        // Validate that essential languages are created
+        List<String> requiredLanguages = Arrays.asList("en", "zu", "af", "fr", "sw", "ar");
+        for (String langCode : requiredLanguages) {
+            languageRepository.findById(langCode)
+                    .orElseThrow(() -> new ValidationException("Required language not created: " + langCode));
+        }
+
+        // Validate regional settings
+        List<String> requiredRegions = Arrays.asList("southernAfrica", "westAfrica", "eastAfrica", "northAfrica");
+        for (String region : requiredRegions) {
+            regionalSettingsRepository.findByRegionGroup(region)
+                    .orElseThrow(() -> new ValidationException("Required regional settings not created: " + region));
+        }
+
+        log.info("Localization data validation passed");
+    }
+
     private void initializeLanguages() {
-        // English (default)
-        Language en = new Language("en", "English", "English", false, true);
-        en.setLanguageRegions(new HashSet<>()); // English is global, no specific region
-        languageRepository.save(en);
+        log.info("Initializing languages...");
 
-        // Zulu
-        Language zu = new Language("zu", "Zulu", "isiZulu", false, false);
-        zu.setLanguageRegions(Set.of(new LanguageRegion(zu, "ZA")));
-        languageRepository.save(zu);
+        List<Language> languages = Arrays.asList(
+                // English (default)
+                createLanguage("en", "English", "English", false, true, Set.of()),
 
-        // Afrikaans
-        Language af = new Language("af", "Afrikaans", "Afrikaans", false, false);
-        af.setLanguageRegions(Set.of(new LanguageRegion(af, "ZA")));
-        languageRepository.save(af);
+                // Southern African languages
+                createLanguage("zu", "Zulu", "isiZulu", false, false, Set.of(RegionCode.ZA)),
+                createLanguage("af", "Afrikaans", "Afrikaans", false, false, Set.of(RegionCode.ZA)),
+                createLanguage("st", "Sotho", "Sesotho", false, false, Set.of(RegionCode.ZA, RegionCode.LS)),
+                createLanguage("tn", "Tswana", "Setswana", false, false, Set.of(RegionCode.ZA, RegionCode.BW)),
+                createLanguage("ts", "Tsonga", "Xitsonga", false, false, Set.of(RegionCode.ZA, RegionCode.MZ)),
+                createLanguage("ve", "Venda", "Tshivenda", false, false, Set.of(RegionCode.ZA)),
+                createLanguage("ss", "Swati", "SiSwati", false, false, Set.of(RegionCode.ZA, RegionCode.SZ)),
+                createLanguage("nr", "Ndebele", "isiNdebele", false, false, Set.of(RegionCode.ZA)),
+                createLanguage("xh", "Xhosa", "isiXhosa", false, false, Set.of(RegionCode.ZA)),
 
-        // Portuguese
-        Language pt = new Language("pt", "Portuguese", "Português", false, false);
-        pt.setLanguageRegions(Set.of(new LanguageRegion(pt, "MZ")));
-        languageRepository.save(pt);
+                // Portuguese for Mozambique
+                createLanguage("pt", "Portuguese", "Português", false, false, Set.of(RegionCode.MZ)),
 
-        // French
-        Language fr = new Language("fr", "French", "Français", false, false);
-        fr.setLanguageRegions(Set.of(
-                new LanguageRegion(fr, "SN"),
-                new LanguageRegion(fr, "CI")
-        ));
-        languageRepository.save(fr);
+                // West African languages
+                createLanguage("fr", "French", "Français", false, false,
+                        Set.of(RegionCode.SN, RegionCode.CI, RegionCode.BF, RegionCode.BJ, RegionCode.NE, RegionCode.TG)),
+                createLanguage("ha", "Hausa", "Hausa", false, false,
+                        Set.of(RegionCode.NG, RegionCode.NE, RegionCode.GH)),
+                createLanguage("yo", "Yoruba", "Yorùbá", false, false,
+                        Set.of(RegionCode.NG, RegionCode.BJ)),
+                createLanguage("ig", "Igbo", "Igbo", false, false, Set.of(RegionCode.NG)),
+                createLanguage("ff", "Fulani", "Fulfulde", false, false,
+                        Set.of(RegionCode.NG, RegionCode.SN, RegionCode.GN)),
+                createLanguage("wo", "Wolof", "Wolof", false, false,
+                        Set.of(RegionCode.SN, RegionCode.GM)),
 
-        // Swahili
-        Language sw = new Language("sw", "Swahili", "Kiswahili", false, false);
-        sw.setLanguageRegions(Set.of(
-                new LanguageRegion(sw, "KE"),
-                new LanguageRegion(sw, "TZ"),
-                new LanguageRegion(sw, "UG")
-        ));
-        languageRepository.save(sw);
+                // East African languages
+                createLanguage("sw", "Swahili", "Kiswahili", false, false,
+                        Set.of(RegionCode.KE, RegionCode.TZ, RegionCode.UG, RegionCode.RW, RegionCode.BI)),
+                createLanguage("am", "Amharic", "አማርኛ", false, false, Set.of(RegionCode.ET)),
+                createLanguage("om", "Oromo", "Afaan Oromoo", false, false, Set.of(RegionCode.ET)),
+                createLanguage("so", "Somali", "Soomaali", false, false,
+                        Set.of(RegionCode.SO, RegionCode.ET, RegionCode.KE)),
+                createLanguage("rw", "Kinyarwanda", "Kinyarwanda", false, false, Set.of(RegionCode.RW)),
 
-        // Arabic
-        Language ar = new Language("ar", "Arabic", "العربية", true, false);
-        ar.setLanguageRegions(Set.of(new LanguageRegion(ar, "EG")));
-        languageRepository.save(ar);
+                // North African languages
+                createLanguage("ar", "Arabic", "العربية", true, false,
+                        Set.of(RegionCode.EG, RegionCode.MA, RegionCode.DZ, RegionCode.TN, RegionCode.LY)),
+                createLanguage("ber", "Berber", "Tamaziɣt", false, false,
+                        Set.of(RegionCode.MA, RegionCode.DZ)),
 
-        // Hausa
-        Language ha = new Language("ha", "Hausa", "Hausa", false, false);
-        ha.setLanguageRegions(Set.of(new LanguageRegion(ha, "NG")));
-        languageRepository.save(ha);
+                // Global languages
+                createLanguage("zh", "Chinese", "中文", false, false, Set.of(RegionCode.CN)),
+                createLanguage("hi", "Hindi", "हिन्दी", false, false, Set.of(RegionCode.IN)),
+                createLanguage("ja", "Japanese", "日本語", false, false, Set.of(RegionCode.JP)),
+                createLanguage("de", "German", "Deutsch", false, false, Set.of(RegionCode.DE)),
+                createLanguage("es", "Spanish", "Español", false, false, Set.of(RegionCode.ES))
+        );
 
-        // Yoruba
-        Language yo = new Language("yo", "Yoruba", "Yorùbá", false, false);
-        yo.setLanguageRegions(Set.of(new LanguageRegion(yo, "NG")));
-        languageRepository.save(yo);
+        // Batch save for better performance
+        List<Language> savedLanguages = languageRepository.saveAll(languages);
+        log.info("Initialized {} languages", savedLanguages.size());
+    }
 
-        // Chinese
-        Language zh = new Language("zh", "Chinese", "中文", false, false);
-        zh.setLanguageRegions(Set.of(new LanguageRegion(zh, "CN")));
-        languageRepository.save(zh);
+    private Language createLanguage(String code, String name, String nativeName,
+                                    boolean rtl, boolean isDefault, Set<RegionCode> regions) {
+        Language language = new Language(code, name, nativeName, rtl, isDefault);
 
-        // Spanish
-        Language es = new Language("es", "Spanish", "Español", false, false);
-        es.setLanguageRegions(Set.of(new LanguageRegion(es, "GLOBAL")));
-        languageRepository.save(es);
+        if (!regions.isEmpty()) {
+            Set<LanguageRegion> languageRegions = regions.stream()
+                    .map(region -> new LanguageRegion(language, region))
+                    .collect(Collectors.toSet());
+            language.setLanguageRegions(languageRegions);
+        }
 
-        // Hindi
-        Language hi = new Language("hi", "Hindi", "हिन्दी", false, false);
-        hi.setLanguageRegions(Set.of(new LanguageRegion(hi, "IN")));
-        languageRepository.save(hi);
-
-        // Japanese
-        Language ja = new Language("ja", "Japanese", "日本語", false, false);
-        ja.setLanguageRegions(Set.of(new LanguageRegion(ja, "JP")));
-        languageRepository.save(ja);
+        return language;
     }
 
     private void initializeCulturalAdaptations() {
+        log.info("Initializing cultural adaptations...");
+
         CulturalAdaptations culturalAdaptations = new CulturalAdaptations();
         culturalAdaptations.setLocalHolidays(true);
+        /*culturalAdaptations.setCulturalSensitivity(true);
+        culturalAdaptations.setReligiousObservances(true);*/
 
         // Initialize calendars
-        Set<SupportedCalendar> calendars = Set.of(
+        Set<SupportedCalendar> calendars = new HashSet<>(Arrays.asList(
                 new SupportedCalendar("gregorian", culturalAdaptations),
                 new SupportedCalendar("islamic", culturalAdaptations),
-                new SupportedCalendar("ethiopian", culturalAdaptations)
-        );
+                new SupportedCalendar("ethiopian", culturalAdaptations),
+                new SupportedCalendar("coptic", culturalAdaptations)
+        ));
         culturalAdaptations.setSupportedCalendars(calendars);
 
         // Initialize number systems
-        Set<SupportedNumberSystem> numberSystems = Set.of(
+        Set<SupportedNumberSystem> numberSystems = new HashSet<>(Arrays.asList(
                 new SupportedNumberSystem("latin", culturalAdaptations),
                 new SupportedNumberSystem("arabic", culturalAdaptations),
-                new SupportedNumberSystem("devanagari", culturalAdaptations)
-        );
+                new SupportedNumberSystem("devanagari", culturalAdaptations),
+                new SupportedNumberSystem("bengali", culturalAdaptations)
+        ));
         culturalAdaptations.setSupportedNumberSystems(numberSystems);
 
         // Initialize currency placement
@@ -155,131 +191,184 @@ public class LocalizationDataInitializer {
         currencyPlacement.setDefaultPlacement("before");
         currencyPlacement.setCulturalAdaptations(culturalAdaptations);
 
-        Set<CurrencyPlacementException> placementExceptions = Set.of(
+        Set<CurrencyPlacementException> placementExceptions = new HashSet<>(Arrays.asList(
                 new CurrencyPlacementException("fr", "after", currencyPlacement),
                 new CurrencyPlacementException("ar", "beforeNoSpace", currencyPlacement),
-                new CurrencyPlacementException("ja", "beforeNoSpace", currencyPlacement)
-        );
+                new CurrencyPlacementException("ja", "beforeNoSpace", currencyPlacement),
+                new CurrencyPlacementException("de", "afterSpace", currencyPlacement)
+        ));
         currencyPlacement.setExceptions(placementExceptions);
         culturalAdaptations.setCurrencyPlacement(currencyPlacement);
 
-        culturalAdaptationsRepository.save(culturalAdaptations);
+        CulturalAdaptations savedAdaptations = culturalAdaptationsRepository.save(culturalAdaptations);
 
-        // Initialize date formats
-        initializeDateFormats(culturalAdaptations);
-        initializeTimeFormats(culturalAdaptations);
-        initializeNumberFormats(culturalAdaptations);
+        // Initialize formats
+        initializeFormats(savedAdaptations);
+
+        log.info("Cultural adaptations initialized");
     }
 
-    private void initializeDateFormats(CulturalAdaptations culturalAdaptations) {
-        Set<DateFormatConfig> dateFormats = Set.of(
-                new DateFormatConfig("ZA", "yyyy/MM/dd", culturalAdaptations),
-                new DateFormatConfig("NG", "dd/MM/yyyy", culturalAdaptations),
-                new DateFormatConfig("KE", "dd-MM-yyyy", culturalAdaptations),
-                new DateFormatConfig("EG", "dd/MM/yyyy", culturalAdaptations),
-                new DateFormatConfig("CN", "yyyy-MM-dd", culturalAdaptations),
-                new DateFormatConfig(null, "yyyy-MM-dd", culturalAdaptations) // default
+    private void initializeFormats(CulturalAdaptations culturalAdaptations) {
+        // Date formats
+        List<DateFormatConfig> dateFormats = Arrays.asList(
+                new DateFormatConfig(RegionCode.ZA, "yyyy/MM/dd", culturalAdaptations),
+                new DateFormatConfig(RegionCode.NG, "dd/MM/yyyy", culturalAdaptations),
+                new DateFormatConfig(RegionCode.KE, "dd-MM-yyyy", culturalAdaptations),
+                new DateFormatConfig(RegionCode.ET, "dd/MM/yyyy", culturalAdaptations),
+                new DateFormatConfig(RegionCode.EG, "dd/MM/yyyy", culturalAdaptations),
+                new DateFormatConfig(RegionCode.MA, "dd/MM/yyyy", culturalAdaptations),
+                new DateFormatConfig(RegionCode.SN, "dd/MM/yyyy", culturalAdaptations),
+                new DateFormatConfig(RegionCode.CN, "yyyy-MM-dd", culturalAdaptations),
+                new DateFormatConfig(RegionCode.US, "MM/dd/yyyy", culturalAdaptations),
+                new DateFormatConfig(null, "yyyy-MM-dd", culturalAdaptations)
         );
         dateFormatConfigRepository.saveAll(dateFormats);
-    }
 
-    private void initializeTimeFormats(CulturalAdaptations culturalAdaptations) {
-        Set<TimeFormatConfig> timeFormats = Set.of(
-                new TimeFormatConfig("ZA", "HH:mm", culturalAdaptations),
-                new TimeFormatConfig("NG", "hh:mm a", culturalAdaptations),
-                new TimeFormatConfig("KE", "HH:mm", culturalAdaptations),
-                new TimeFormatConfig(null, "HH:mm", culturalAdaptations) // default
+        // Time formats - FIXED: Use RegionCode enum instead of String for regionCode
+        List<TimeFormatConfig> timeFormats = Arrays.asList(
+                new TimeFormatConfig(RegionCode.ZA, "HH:mm", culturalAdaptations),
+                new TimeFormatConfig(RegionCode.NG, "hh:mm a", culturalAdaptations),
+                new TimeFormatConfig(RegionCode.KE, "HH:mm", culturalAdaptations),
+                new TimeFormatConfig(RegionCode.ET, "h:mm a", culturalAdaptations),
+                new TimeFormatConfig(RegionCode.EG, "HH:mm", culturalAdaptations),
+                new TimeFormatConfig(RegionCode.US, "h:mm a", culturalAdaptations),
+                new TimeFormatConfig(null, "HH:mm", culturalAdaptations)
         );
         timeFormatConfigRepository.saveAll(timeFormats);
-    }
 
-    private void initializeNumberFormats(CulturalAdaptations culturalAdaptations) {
-        Set<NumberFormatConfig> numberFormats = Set.of(
-                new NumberFormatConfig("ZA", ".", " ", "[3,3]", culturalAdaptations),
-                new NumberFormatConfig("NG", ".", ",", "[3,3]", culturalAdaptations),
-                new NumberFormatConfig("FR", ",", " ", "[3,3]", culturalAdaptations),
-                new NumberFormatConfig(null, ".", ",", "[3,3]", culturalAdaptations) // default
+        // Number formats - FIXED: Use RegionCode enum instead of String for regionCode
+        List<NumberFormatConfig> numberFormats = Arrays.asList(
+                new NumberFormatConfig(RegionCode.ZA, ".", " ", "[3,3]", culturalAdaptations),
+                new NumberFormatConfig(RegionCode.NG, ".", ",", "[3,3]", culturalAdaptations),
+                new NumberFormatConfig(RegionCode.KE, ".", ",", "[3,3]", culturalAdaptations),
+                new NumberFormatConfig(RegionCode.FR, ",", " ", "[3,3]", culturalAdaptations),
+                new NumberFormatConfig(RegionCode.DE, ",", ".", "[3,3]", culturalAdaptations),
+                new NumberFormatConfig(RegionCode.IN, ".", ",", "[3,2]", culturalAdaptations),
+                new NumberFormatConfig(null, ".", ",", "[3,3]", culturalAdaptations)
         );
         numberFormatConfigRepository.saveAll(numberFormats);
     }
 
     private void initializeRegionalSettings() {
-        // Southern Africa
-        RegionalSettings southernAfrica = new RegionalSettings();
-        southernAfrica.setRegionGroup("southernAfrica");
-        southernAfrica.setDefaultLanguage("en");
-        southernAfrica.setDateFormat("yyyy/MM/dd");
-        southernAfrica.setTimeFormat("HH:mm");
-        southernAfrica.setFirstDayOfWeek(0);
+        log.info("Initializing regional settings...");
 
-        Set<RegionalFallbackLanguage> southernFallbacks = Set.of(
-                new RegionalFallbackLanguage("zu", 1, southernAfrica),
-                new RegionalFallbackLanguage("af", 2, southernAfrica)
+        List<RegionalSettings> regionalSettings = Arrays.asList(
+                createSouthernAfricaSettings(),
+                createWestAfricaSettings(),
+                createEastAfricaSettings(),
+                createNorthAfricaSettings(),
+                createGlobalSettings()
         );
-        southernAfrica.setFallbackLanguages(southernFallbacks);
-        regionalSettingsRepository.save(southernAfrica);
 
-        // West Africa
-        RegionalSettings westAfrica = new RegionalSettings();
-        westAfrica.setRegionGroup("westAfrica");
-        westAfrica.setDefaultLanguage("en");
-        westAfrica.setDateFormat("dd/MM/yyyy");
-        westAfrica.setTimeFormat("hh:mm a");
-        westAfrica.setFirstDayOfWeek(1);
+        regionalSettingsRepository.saveAll(regionalSettings);
+        log.info("Regional settings initialized for {} regions", regionalSettings.size());
+    }
 
-        Set<RegionalFallbackLanguage> westFallbacks = Set.of(
-                new RegionalFallbackLanguage("fr", 1, westAfrica),
-                new RegionalFallbackLanguage("ha", 2, westAfrica),
-                new RegionalFallbackLanguage("yo", 3, westAfrica)
-        );
-        westAfrica.setFallbackLanguages(westFallbacks);
-        regionalSettingsRepository.save(westAfrica);
+    private RegionalSettings createSouthernAfricaSettings() {
+        RegionalSettings settings = new RegionalSettings();
+        settings.setRegionGroup("southernAfrica");
+        settings.setDefaultLanguage("en");
+        settings.setDateFormat("yyyy/MM/dd");
+        settings.setTimeFormat("HH:mm");
+        settings.setFirstDayOfWeek(0); // Sunday
 
-        // East Africa
-        RegionalSettings eastAfrica = new RegionalSettings();
-        eastAfrica.setRegionGroup("eastAfrica");
-        eastAfrica.setDefaultLanguage("sw");
-        eastAfrica.setDateFormat("dd-MM-yyyy");
-        eastAfrica.setTimeFormat("HH:mm");
-        eastAfrica.setFirstDayOfWeek(0);
+        Set<RegionalFallbackLanguage> fallbacks = new HashSet<>(Arrays.asList(
+                new RegionalFallbackLanguage("zu", 1, settings),
+                new RegionalFallbackLanguage("af", 2, settings),
+                new RegionalFallbackLanguage("st", 3, settings)
+        ));
+        settings.setFallbackLanguages(fallbacks);
 
-        Set<RegionalFallbackLanguage> eastFallbacks = Set.of(
-                new RegionalFallbackLanguage("en", 1, eastAfrica),
-                new RegionalFallbackLanguage("ar", 2, eastAfrica)
-        );
-        eastAfrica.setFallbackLanguages(eastFallbacks);
-        regionalSettingsRepository.save(eastAfrica);
+        return settings;
+    }
 
-        // North Africa
-        RegionalSettings northAfrica = new RegionalSettings();
-        northAfrica.setRegionGroup("northAfrica");
-        northAfrica.setDefaultLanguage("ar");
-        northAfrica.setDateFormat("dd/MM/yyyy");
-        northAfrica.setTimeFormat("HH:mm");
-        northAfrica.setFirstDayOfWeek(6);
+    private RegionalSettings createWestAfricaSettings() {
+        RegionalSettings settings = new RegionalSettings();
+        settings.setRegionGroup("westAfrica");
+        settings.setDefaultLanguage("en");
+        settings.setDateFormat("dd/MM/yyyy");
+        settings.setTimeFormat("hh:mm a");
+        settings.setFirstDayOfWeek(1); // Monday
 
-        Set<RegionalFallbackLanguage> northFallbacks = Set.of(
-                new RegionalFallbackLanguage("fr", 1, northAfrica),
-                new RegionalFallbackLanguage("en", 2, northAfrica)
-        );
-        northAfrica.setFallbackLanguages(northFallbacks);
-        regionalSettingsRepository.save(northAfrica);
+        Set<RegionalFallbackLanguage> fallbacks = new HashSet<>(Arrays.asList(
+                new RegionalFallbackLanguage("fr", 1, settings),
+                new RegionalFallbackLanguage("ha", 2, settings),
+                new RegionalFallbackLanguage("yo", 3, settings),
+                new RegionalFallbackLanguage("ff", 4, settings)
+        ));
+        settings.setFallbackLanguages(fallbacks);
+
+        return settings;
+    }
+
+    private RegionalSettings createEastAfricaSettings() {
+        RegionalSettings settings = new RegionalSettings();
+        settings.setRegionGroup("eastAfrica");
+        settings.setDefaultLanguage("sw");
+        settings.setDateFormat("dd-MM-yyyy");
+        settings.setTimeFormat("HH:mm");
+        settings.setFirstDayOfWeek(0); // Sunday
+
+        Set<RegionalFallbackLanguage> fallbacks = new HashSet<>(Arrays.asList(
+                new RegionalFallbackLanguage("en", 1, settings),
+                new RegionalFallbackLanguage("am", 2, settings),
+                new RegionalFallbackLanguage("so", 3, settings)
+        ));
+        settings.setFallbackLanguages(fallbacks);
+
+        return settings;
+    }
+
+    private RegionalSettings createNorthAfricaSettings() {
+        RegionalSettings settings = new RegionalSettings();
+        settings.setRegionGroup("northAfrica");
+        settings.setDefaultLanguage("ar");
+        settings.setDateFormat("dd/MM/yyyy");
+        settings.setTimeFormat("HH:mm");
+        settings.setFirstDayOfWeek(6); // Saturday
+
+        Set<RegionalFallbackLanguage> fallbacks = new HashSet<>(Arrays.asList(
+                new RegionalFallbackLanguage("fr", 1, settings),
+                new RegionalFallbackLanguage("ber", 2, settings),
+                new RegionalFallbackLanguage("en", 3, settings)
+        ));
+        settings.setFallbackLanguages(fallbacks);
+
+        return settings;
+    }
+
+    private RegionalSettings createGlobalSettings() {
+        RegionalSettings settings = new RegionalSettings();
+        settings.setRegionGroup("global");
+        settings.setDefaultLanguage("en");
+        settings.setDateFormat("yyyy-MM-dd");
+        settings.setTimeFormat("HH:mm");
+        settings.setFirstDayOfWeek(1); // Monday
+
+        Set<RegionalFallbackLanguage> fallbacks = new HashSet<>(Arrays.asList(
+                new RegionalFallbackLanguage("es", 1, settings),
+                new RegionalFallbackLanguage("fr", 2, settings),
+                new RegionalFallbackLanguage("zh", 3, settings)
+        ));
+        settings.setFallbackLanguages(fallbacks);
+
+        return settings;
     }
 
     private void initializeLocalizationConfig() {
+        log.info("Initializing localization configuration...");
+
         CulturalAdaptations culturalAdaptations = culturalAdaptationsRepository.findAll().get(0);
-        AccessibilitySettings accessibility = initializeAccessibility();
-        LocalizationEngine engine = initializeLocalizationEngine();
 
         LocalizationConfig config = new LocalizationConfig();
         config.setRtlSupport(true);
         config.setLocaleAwareFormatting(true);
-        //config.setCulturalAdaptations(culturalAdaptations);
         config.addCulturalAdaptations(culturalAdaptations);
-        config.setAccessibility(accessibility);
-        config.setLocalizationEngine(engine);
+        config.setAccessibility(initializeAccessibility());
+        config.setLocalizationEngine(initializeLocalizationEngine());
 
         localizationConfigRepository.save(config);
+        log.info("Localization configuration initialized");
     }
 
     private AccessibilitySettings initializeAccessibility() {
@@ -296,7 +385,7 @@ public class LocalizationDataInitializer {
         engine.setAutoDetection(true);
         engine.setFallbackChains(true);
         engine.setContextAware(true);
-        engine.setVersion("2025-09-26");
+        engine.setVersion("2.0.0");
         return engine;
     }
 }

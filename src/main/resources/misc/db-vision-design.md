@@ -222,4 +222,19 @@ If the tables exist but are empty, the data initializer might not have run. Chec
 3. **Application Logs**: Look for data initialization messages
 4. **Database Permissions**: Ensure the application user has insert permissions
 
-Would you like me to help you troubleshoot any specific issues with the data initialization?
+
+| **Category**          | **Field Name**                                    | **Type**          | **JPA Mapping / Notes**                                  |
+|:----------------------|:--------------------------------------------------|:------------------|:---------------------------------------------------------|
+| **Primary Key**       | `regionCode`                                      | `RegionCode`      | `@Id @Enumerated(EnumType.STRING)`                       |
+| **Tax Information**   | `taxAuthority`                                    | `String`          | `@Column(nullable = false)`                              |
+|                       | `vatRate`, `withholdingTaxRate`, `importDutyRate` | `BigDecimal`      | `@Column(precision=5, scale=2)`                          |
+|                       | `reportingThreshold`                              | `BigDecimal`      | `@Column(precision=15, scale=2)`                         |
+| **SA Compliance**     | `sarsBranchCode`                                  | `String`          | `@Column(length = 10)`                                   |
+|                       | `cpaEnforced`, `bbrEnforced`                      | `Boolean`         | `@Column(nullable = false)`                              |
+| **Status & Auditing** | `complianceLevel`                                 | `ComplianceLevel` | `@Enumerated(EnumType.STRING) @Column(nullable = false)` |
+|                       | `lastAuditDate`, `nextAuditDue`                   | `LocalDateTime`   |                                                          |
+|                       | `complianceScore`                                 | `BigDecimal`      | `@Column(precision=5, scale=2)`                          |
+| **Regional Rules**    | `requiresTaxInvoice`                              | `Boolean`         | `@Column(nullable = false)`                              |
+|                       | `taxInvoiceFormat`                                | `String`          |                                                          |
+|                       | `minimumWage`, `environmentalLevy`                | `BigDecimal`      | `@Column(precision=10, scale=2)`                         |
+

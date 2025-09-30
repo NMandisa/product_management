@@ -4,7 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import za.co.pms.enums.PriceType;
 import za.co.pms.enums.TaxType;
-import za.co.pms.model.Auditable;
+import za.co.pms.model.compliance.Auditable;
+import za.co.pms.model.compliance.TaxClass;
 
 import java.io.Serializable;
 import java.math.BigDecimal;

@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import za.co.pms.enums.Region;
+import za.co.pms.model.compliance.Auditable;
 import za.co.pms.model.product.Price;
 import za.co.pms.model.product.Variant;
 

@@ -14,6 +14,6 @@ import java.util.Optional;
  **/
 @Repository
 public interface RegionalHierarchyRepository extends JpaRepository<RegionalHierarchy, Long> {
-    @Query("SELECT rh FROM RegionalHierarchy rh WHERE rh.regionName = :regionName")
-    Optional<RegionalHierarchy> findByRegionName(@Param("regionName") String regionName);
+    @Query("SELECT rh FROM RegionalHierarchy rh WHERE rh.name = :name")
+    Optional<RegionalHierarchy> findByRegionName(@Param("name") String name);
 }

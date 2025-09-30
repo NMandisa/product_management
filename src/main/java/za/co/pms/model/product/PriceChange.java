@@ -3,9 +3,8 @@ package za.co.pms.model.product;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.annotation.CreatedDate;
 import za.co.pms.enums.PriceChangeType;
-import za.co.pms.model.Auditable;
+import za.co.pms.model.compliance.Auditable;
 import za.co.pms.model.Promotion;
 
 import java.io.Serializable;

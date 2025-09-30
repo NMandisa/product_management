@@ -1,4 +1,4 @@
-package za.co.pms.model;
+package za.co.pms.model.compliance;
 
 import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedDate;

@@ -1,4 +1,4 @@
-package za.co.pms.model.inventory.sku;
+package za.co.pms.model.inventory.vendor;
 
 import jakarta.persistence.*;
 import lombok.Getter;

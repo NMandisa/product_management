@@ -73,9 +73,10 @@ dependencies {
     implementation("io.micrometer:micrometer-core:1.15.4")
     // Spring Framework
     implementation("org.springframework.cloud:spring-cloud-context:4.3.0")
+    implementation 'org.springframework:spring-context:6.1.11'
+    implementation "org.springframework:spring-aspects:6.1.11"
     implementation 'org.springframework:spring-orm:6.1.11'
     implementation("org.springframework:spring-aop:6.1.11")
-    implementation("org.aspectj:aspectjweaver:1.9.24")
     implementation("org.aspectj:aspectjweaver:1.9.24")
     implementation 'org.springframework.data:spring-data-jpa:3.3.2'
     implementation 'org.springframework.data:spring-data-commons:3.3.2'

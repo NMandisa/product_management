@@ -1,4 +1,4 @@
-package za.co.pms.model.product;
+package za.co.pms.model.compliance;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import za.co.pms.enums.CountryCode;
 
 /**
  * @author NMMkhungo
@@ -22,7 +23,8 @@ public class RegionalDefault {
     private Long id;
 
     @Column(name = "country_code", length = 2)
-    private String countryCode;
+    @Enumerated(EnumType.STRING)
+    private CountryCode countryCode;
 
     @Column(name = "currency_code", length = 3)
     private String currencyCode;
@@ -31,7 +33,7 @@ public class RegionalDefault {
     @JoinColumn(name = "config_id")
     private CurrencyConfig config;
 
-    public RegionalDefault(String countryCode, String currencyCode, FxConfiguration fxConfiguration) {
+    public RegionalDefault(CountryCode countryCode, String currencyCode, FxConfiguration fxConfiguration) {
         this.countryCode = countryCode;
         this.currencyCode = currencyCode;
         this.config = null; // Will be set when CurrencyConfig is created

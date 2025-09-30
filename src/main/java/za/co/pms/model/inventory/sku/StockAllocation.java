@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import za.co.pms.enums.StockStatus;
 import za.co.pms.exception.InsufficientStockException;
-import za.co.pms.model.Auditable;
+import za.co.pms.model.compliance.Auditable;
 import za.co.pms.model.product.Variant;
 
 import java.io.Serializable;

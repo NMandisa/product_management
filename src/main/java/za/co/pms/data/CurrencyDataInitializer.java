@@ -3,7 +3,9 @@ package za.co.pms.data;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import za.co.pms.enums.CountryCode;
 import za.co.pms.enums.Region;
 import za.co.pms.enums.CurrencyStatus;
 import za.co.pms.model.settings.Currency;
@@ -17,7 +19,8 @@ import java.util.Set;
  * @author NMMkhungo
  * @since 2025/09/28
  **/
-@Component
+@Slf4j
+//@Component
 @RequiredArgsConstructor
 public class CurrencyDataInitializer {
 
@@ -69,19 +72,35 @@ public class CurrencyDataInitializer {
         Set<RegionalDefault> regionalDefaults = new HashSet<>();
 
         // Create regional defaults for each country
-        String[][] countryCurrencyPairs = {
-                {"ZA", "ZAR"}, {"NG", "NGN"}, {"KE", "KES"}, {"GH", "GHS"},
-                {"BW", "BWP"}, {"MZ", "MZN"}, {"TZ", "TZS"}, {"ZM", "ZMW"},
-                {"MW", "MWK"}, {"NA", "NAD"}, {"EG", "EGP"}, {"SN", "XOF"},
-                {"CI", "XOF"}, {"RW", "RWF"}, {"UG", "UGX"}, {"US", "USD"},
-                {"GB", "GBP"}, {"FR", "EUR"}, {"CN", "CNY"}, {"IN", "INR"},
-                {"global", "USD"}
+        // Define defaults as enum + currency
+        Object[][] countryCurrencyPairs = {
+                {CountryCode.ZA, "ZAR"},
+                {CountryCode.NG, "NGN"},
+                {CountryCode.KE, "KES"},
+                {CountryCode.GH, "GHS"},
+                {CountryCode.BW, "BWP"},
+                {CountryCode.MZ, "MZN"},
+                {CountryCode.TZ, "TZS"},
+                {CountryCode.ZM, "ZMW"},
+                //{CountryCode.MW, "MWK"},
+                {CountryCode.NA, "NAD"},
+                //{CountryCode.EG, "EGP"},
+                {CountryCode.SN, "XOF"},
+                {CountryCode.CI, "XOF"},
+                {CountryCode.RW, "RWF"},
+                {CountryCode.UG, "UGX"},
+                //{CountryCode.US, "USD"},
+                {CountryCode.GB, "GBP"},
+                {CountryCode.FR, "EUR"},
+                //{CountryCode.CN, "CNY"},
+                //{CountryCode.IN, "INR"},
+                //{CountryCode.GLOBAL, "USD"} // special constant in enum
         };
 
-        for (String[] pair : countryCurrencyPairs) {
+        for (Object[] pair : countryCurrencyPairs) {
             RegionalDefault regionalDefault = new RegionalDefault();
-            regionalDefault.setCountryCode(pair[0]);
-            regionalDefault.setCurrencyCode(pair[1]);
+            regionalDefault.setCountryCode((CountryCode) pair[0]);
+            regionalDefault.setCurrencyCode((String)pair[1]);
             regionalDefault.setConfig(currencyConfig);
             regionalDefaults.add(regionalDefault);
         }
@@ -382,42 +401,42 @@ public class CurrencyDataInitializer {
         Currency inr = currencyRepository.findByCurrencyCode("INR").orElseGet(() -> createCurrency("INR", "Indian Rupee", "₹", 2,Region.ASIA, "RBI"));
         Currency brl = currencyRepository.findByCurrencyCode("BRL").orElseGet(() -> createCurrency("BRL", "Brazilian Real", "R$", 2, Region.SOUTHERN_AMERICA, "BCB"));
         Currency trl = currencyRepository.findByCurrencyCode("TRY").orElseGet(() -> createCurrency("TRY", "Turkish Lira", "₺", 2, Region.EUROPE, "CBRT"));
-        Currency mxn = currencyRepository.findByCurrencyCode("MXN").orElseGet(() -> createCurrency("MXN", "Mexican Peso", "$", 2, Region.NOTHERN_AMERICA, "BdM"));
+        Currency mxn = currencyRepository.findByCurrencyCode("MXN").orElseGet(() -> createCurrency("MXN", "Mexican Peso", "$", 2, Region.NORTHERN_AMERICA, "BdM"));
 
         // Southern Africa Regional Hierarchy
         RegionalHierarchy southernAfrica = new RegionalHierarchy();
-        southernAfrica.setRegionName("southernAfrica");
+        southernAfrica.setName(Region.SOUTHERN_AFRICA.getDisplayName());
         southernAfrica.setCurrencies(Set.of(zar, bwp, mzn, zmw, mwk, nad));
         regionalHierarchyRepository.save(southernAfrica);
 
         // West Africa Regional Hierarchy
         RegionalHierarchy westAfrica = new RegionalHierarchy();
-        westAfrica.setRegionName("westAfrica");
+        westAfrica.setName(Region.WEST_AFRICA.getDisplayName());
         westAfrica.setCurrencies(Set.of(ngn, ghs, xof, xaf, gnf));
         regionalHierarchyRepository.save(westAfrica);
 
         // East Africa Regional Hierarchy
         RegionalHierarchy eastAfrica = new RegionalHierarchy();
-        eastAfrica.setRegionName("eastAfrica");
+        eastAfrica.setName(Region.EAST_AFRICA.getDisplayName());
         //eastAfrica.setCurrencies(Set.of(kes, tzs, ugx, rwf, etb));
         eastAfrica.setCurrencies(Set.of(kes, tzs, rwf, etb));
         regionalHierarchyRepository.save(eastAfrica);
 
         // North Africa Regional Hierarchy
         RegionalHierarchy northAfrica = new RegionalHierarchy();
-        northAfrica.setRegionName("northAfrica");
+        northAfrica.setName(Region.NORTH_AFRICA.getDisplayName());
         northAfrica.setCurrencies(Set.of(egp, mad, dzd, tnd));
         regionalHierarchyRepository.save(northAfrica);
 
         // Global Reserve Regional Hierarchy
         RegionalHierarchy globalReserve = new RegionalHierarchy();
-        globalReserve.setRegionName("globalReserve");
+        globalReserve.setName("globalReserve");
         globalReserve.setCurrencies(Set.of(usd, eur, gbp, cny));
         regionalHierarchyRepository.save(globalReserve);
 
         // Emerging Markets Regional Hierarchy
         RegionalHierarchy emergingMarkets = new RegionalHierarchy();
-        emergingMarkets.setRegionName("emergingMarkets");
+        emergingMarkets.setName("emergingMarkets");
         emergingMarkets.setCurrencies(Set.of(inr, brl, trl, mxn));
         regionalHierarchyRepository.save(emergingMarkets);
     }

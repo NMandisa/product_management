@@ -23,7 +23,7 @@ public class RegionalHierarchy {
     private Long id;
 
     @Column(name = "region_name", unique = true)
-    private String regionName;
+    private String name;
 
     @ManyToMany
     @JoinTable(
@@ -35,7 +35,7 @@ public class RegionalHierarchy {
     private Set<Currency> currencies = new HashSet<>();
 
     public RegionalHierarchy(String regionName, Set<Currency> currencies) {
-        this.regionName = regionName;
+        this.name = regionName;
         this.currencies = currencies;
     }
 }

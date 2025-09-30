@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import za.co.pms.enums.RegionCode;
 
 /**
  * @author NMMkhungo
@@ -22,7 +23,8 @@ public class TimeFormatConfig {
     private Long id;
 
     @Column(name = "region_code", length = 5)
-    private String regionCode; // ZA, NG, KE, null for default
+    @Enumerated(EnumType.STRING)
+    private RegionCode regionCode; // ZA, NG, KE, null for default
 
     @Column(name = "time_format", nullable = false)
     private String timeFormat;
@@ -31,7 +33,7 @@ public class TimeFormatConfig {
     @JoinColumn(name = "cultural_adaptations_id")
     private CulturalAdaptations culturalAdaptations;
 
-    public TimeFormatConfig(String regionCode, String timeFormat, CulturalAdaptations culturalAdaptations) {
+    public TimeFormatConfig(RegionCode regionCode, String timeFormat, CulturalAdaptations culturalAdaptations) {
         this.regionCode = regionCode;
         this.timeFormat = timeFormat;
         this.culturalAdaptations = culturalAdaptations;

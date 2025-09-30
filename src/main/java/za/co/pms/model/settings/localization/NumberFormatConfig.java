@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import za.co.pms.enums.RegionCode;
 
 /**
  * @author NMMkhungo
@@ -22,7 +23,7 @@ public class NumberFormatConfig {
     private Long id;
 
     @Column(name = "region_code", length = 5)
-    private String regionCode; // ZA, NG, FR, null for default
+    private RegionCode regionCode; // ZA, NG, FR, null for default
 
     @Column(name = "decimal_separator", nullable = false)
     private String decimalSeparator;
@@ -37,7 +38,7 @@ public class NumberFormatConfig {
     @JoinColumn(name = "cultural_adaptations_id")
     private CulturalAdaptations culturalAdaptations;
 
-    public NumberFormatConfig(String regionCode, String decimalSeparator, String thousandsSeparator,
+    public NumberFormatConfig(RegionCode regionCode, String decimalSeparator, String thousandsSeparator,
                               String groupingPattern, CulturalAdaptations culturalAdaptations) {
         this.regionCode = regionCode;
         this.decimalSeparator = decimalSeparator;
